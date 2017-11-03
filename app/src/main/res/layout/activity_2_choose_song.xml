@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.finnzhanchen.songgo.Activity_2_Choose_Song">
+
+    <Button
+        android:id="@+id/button_random"
+        android:layout_width="97dp"
+        android:layout_height="55dp"
+        android:layout_marginTop="16dp"
+        android:text="Random"
+        app:layout_constraintHorizontal_bias="0.501"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_go" />
+
+    <Spinner
+        android:id="@+id/spinner_song"
+        android:layout_width="265dp"
+        android:layout_height="31dp"
+        android:layout_marginTop="20dp"
+        android:textAlignment="center"
+        app:layout_constraintHorizontal_bias="0.663"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+    <Button
+        android:id="@+id/button_go"
+        android:layout_width="96dp"
+        android:layout_height="47dp"
+        android:layout_marginTop="120dp"
+        android:text="GO!"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/spinner_difficulty" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="235dp"
+        android:layout_height="34dp"
+        android:layout_marginTop="32dp"
+        android:text="Choose a song:"
+        android:textAlignment="center"
+        android:textSize="24sp"
+        app:layout_constraintHorizontal_bias="0.504"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Choose a difficulty:"
+        android:textSize="24sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/spinner_song" />
+
+    <Spinner
+        android:id="@+id/spinner_difficulty"
+        android:layout_width="255dp"
+        android:layout_height="31dp"
+        android:layout_marginTop="16dp"
+        android:textAlignment="center"
+        app:layout_constraintHorizontal_bias="0.645"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView2" />
+
+</android.support.constraint.ConstraintLayout>
