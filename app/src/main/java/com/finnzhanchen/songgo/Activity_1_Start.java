@@ -19,4 +19,11 @@ public class Activity_1_Start extends AppCompatActivity {
         startActivity(intent);
         
     }
+
+    /** Called when the user taps the Tutorial button */
+    public void buttonTutorial(View view) {
+        Intent intent = new Intent(this,Activity_3_Maps_with_Nav.class);
+        startActivity(intent);
+
+    }
 }

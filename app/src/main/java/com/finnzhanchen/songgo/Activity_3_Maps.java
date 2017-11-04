@@ -70,41 +70,6 @@ public class Activity_3_Maps
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
-        /* Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-        */
-
-
-        Intent intent = getIntent();
-        String song = intent.getStringExtra("song_selected");
-        String difficulty = intent.getStringExtra("difficulty_selected");
-        //Log.e("song", song + difficulty);
-        String url = null;
-        switch (difficulty){
-            case "Novice":
-                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/" + song + "/map5.kml";
-                break;
-            case "Easy":
-                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/" + song + "/map4.kml";
-                break;
-            case "Normal":
-                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/" + song + "/map3.kml";
-                break;
-            case "Hard":
-                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/" + song + "/map2.kml";
-                break;
-            case "Hardcore":
-                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/" + song + "/map1.kml";
-                break;
-            default:
-                break;
-        }
-        Log.e("URL", url);
-        new DownloadPlacemarkTask(mMap).execute(url);
-
         try {
             // Visualise current position with a small blue circle
             mMap.setMyLocationEnabled(true);
@@ -113,6 +78,13 @@ public class Activity_3_Maps
         }
         // Add ‘‘My location’’ button to the user interface
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
+
+        Intent intent = getIntent();
+        String song = intent.getStringExtra("song_selected");
+        String difficulty = intent.getStringExtra("difficulty_selected");
+        //Log.e("song", song + difficulty);
+        loadPlacemarksOnMap(song, difficulty);
+
     }
 
     @Override
@@ -157,9 +129,8 @@ public class Activity_3_Maps
 
             // When connected, move camera to last known user location
             LatLng myLastLocation = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-            CameraUpdate myLocation = CameraUpdateFactory.newLatLngZoom(myLastLocation, 19);
+            CameraUpdate myLocation = CameraUpdateFactory.newLatLngZoom(myLastLocation, 18);
             mMap.animateCamera(myLocation);
-
 
         } else {
             ActivityCompat.requestPermissions(this,
@@ -188,6 +159,31 @@ public class Activity_3_Maps
         // could not be established. Display an error message, or handle
         // the failure silently
         System.out.println(" >>>> onConnectionFailed");
+    }
+
+    private void loadPlacemarksOnMap(String song, String difficulty){
+        String url = null;
+        switch (difficulty){
+            case "Novice":
+                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/" + song + "/map5.kml";
+                break;
+            case "Easy":
+                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/" + song + "/map4.kml";
+                break;
+            case "Normal":
+                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/" + song + "/map3.kml";
+                break;
+            case "Hard":
+                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/" + song + "/map2.kml";
+                break;
+            case "Hardcore":
+                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/" + song + "/map1.kml";
+                break;
+            default:
+                break;
+        }
+        Log.e("URL", url);
+        new DownloadPlacemarkTask(mMap).execute(url);
     }
 
 
