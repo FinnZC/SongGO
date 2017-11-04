@@ -4,22 +4,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 public class Activity_2_Choose_Song extends AppCompatActivity {
@@ -36,7 +26,7 @@ public class Activity_2_Choose_Song extends AppCompatActivity {
 
     /** Called when the user taps the GO button */
     public void buttonGO(View view) {
-        Intent intent = new Intent(this, Activity_3_Maps.class);
+        Intent intent = new Intent(this, Activity_3_Game.class);
         String song_selected = ((Spinner)
                 findViewById(R.id.spinner_song)).getSelectedItem().toString();
         String difficulty_selected = ((Spinner)
@@ -49,7 +39,7 @@ public class Activity_2_Choose_Song extends AppCompatActivity {
 
     /** Called when the user taps the GO button */
     public void buttonRandom(View view) {
-        Intent intent = new Intent(this, Activity_3_Maps.class);
+        Intent intent = new Intent(this, Activity_3_Game.class);
         Random rand = new Random();
 
         Spinner song_selector = (Spinner) findViewById(R.id.spinner_song);
