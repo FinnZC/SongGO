@@ -1,13 +1,16 @@
 package com.finnzhanchen.songgo;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -23,7 +26,7 @@ import com.google.android.gms.location.LocationServices;
 //THE FOLLOWING ACTIVITY TEMPLATE IS FROM
 //SOFWARE ENGINEERLING LARGE PRACTICAL LECTURE 3
 //WHERE MY OWN CODE STARTS IS DOCUMENTED
-public class Maps_Activity
+public class Activity_3_Maps
         extends FragmentActivity
         implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
@@ -40,7 +43,7 @@ public class Maps_Activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps_);
+        setContentView(R.layout.activity_3_maps_);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -68,10 +71,39 @@ public class Maps_Activity
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
+        /* Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(-34, 151);
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        */
+
+
+        Intent intent = getIntent();
+        String song = intent.getStringExtra("song_selected");
+        String difficulty = intent.getStringExtra("difficulty_selected");
+        //Log.e("song", song + difficulty);
+        String url = null;
+        switch (difficulty){
+            case "Novice":
+                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/" + song + "/map5.kml";
+                break;
+            case "Easy":
+                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/" + song + "/map4.kml";
+                break;
+            case "Normal":
+                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/" + song + "/map3.kml";
+                break;
+            case "Hard":
+                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/" + song + "/map2.kml";
+                break;
+            case "Hardcore":
+                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/" + song + "/map1.kml";
+                break;
+            default:
+                break;
+        }
+        Log.e("URL", url);
+        new DownloadPlacemarkTask(mMap).execute(url);
 
         try {
             // Visualise current position with a small blue circle
@@ -122,6 +154,13 @@ public class Maps_Activity
                 PackageManager.PERMISSION_GRANTED) {
             mLastLocation =
                     LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+
+            // When connected, move camera to last known user location
+            LatLng myLastLocation = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+            CameraUpdate myLocation = CameraUpdateFactory.newLatLngZoom(myLastLocation, 19);
+            mMap.animateCamera(myLocation);
+
+
         } else {
             ActivityCompat.requestPermissions(this,
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},

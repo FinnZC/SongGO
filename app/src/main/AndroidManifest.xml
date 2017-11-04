@@ -39,7 +39,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Maps_Activity"
+            android:name=".Activity_3_Maps"
             android:label="@string/title_activity_maps_">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -47,6 +47,7 @@
         </activity>
         <activity android:name=".Activity_2_1_Choose_Song" />
         <activity android:name=".Activity_2_Choose_Song" />
+        <activity android:name=".Network_Activity"></activity>
     </application>
 
 </manifest>

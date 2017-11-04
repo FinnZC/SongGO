@@ -13,7 +13,7 @@ public class Activity_1_Start extends AppCompatActivity {
         setContentView(R.layout.activity_1_start_);
     }
 
-    /** Called when the user taps the Send button */
+    /** Called when the user taps the Start button */
     public void buttonStartGame(View view) {
         Intent intent = new Intent(this, Activity_2_Choose_Song.class);
         startActivity(intent);

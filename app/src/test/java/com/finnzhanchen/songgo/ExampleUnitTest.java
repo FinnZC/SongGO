@@ -18,7 +18,7 @@ public class ExampleUnitTest {
     @Test
     public void XmlTest() {
         String[] urls = new String[]{"http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/01/lyrics.txt"};
-        DownloadXmlTask d = new DownloadXmlTask();
+        DownloadPlacemarkTask d = new DownloadPlacemarkTask();
         d.doInBackground(urls);
         assertEquals(4,4);
     }
