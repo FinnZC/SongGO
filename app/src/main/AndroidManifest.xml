@@ -41,15 +41,9 @@
         <activity android:name=".Activity_2_Choose_Song" />
         <activity
             android:name=".Activity_3_Game"
-            android:label="@string/title_activity__game"
+            android:label="@string/title_activity_game"
             android:theme="@style/AppTheme.NoActionBar"></activity>
-        <activity
-            android:name=".Activity_3_Maps_Fragment"
-            android:label="@string/title_activity_maps_">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.finnzhanchen.songgo.Activity_3_Game" />
-        </activity>
+
 
     </application>
 

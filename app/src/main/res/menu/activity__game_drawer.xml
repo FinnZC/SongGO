@@ -1,38 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
-    <group android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_camera"
-            android:icon="@drawable/ic_menu_camera"
-            android:title="Import" />
-        <item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="Gallery" />
-        <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="Slideshow" />
-        <item
-            android:id="@+id/nav_manage"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="Tools" />
-    </group>
-
-    <item android:title="Communicate">
+    <item
+        android:id="@+id/item_guess_remaining"
+        android:title="Guess Remaining: " />
+    <item
+        android:id="@+id/item_difficulty"
+        android:title="Difficulty: " />
+    <item
+        android:id="@+id/item_clock"
+        android:title="Clock: " />
+    <item android:title="Available Actions">
         <menu>
             <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
+                android:id="@+id/item_view_collected_words"
+                android:icon="@android:drawable/ic_menu_view"
+                android:title="View Collected Words" />
             <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
+                android:id="@+id/item_guess_song"
+                android:icon="@android:drawable/ic_partial_secure"
+                android:title="Guess Song" />
+            <item
+                android:id="@+id/item_superpower"
+                android:icon="@android:drawable/ic_menu_search"
+                android:title="Superpower" />
+            <item
+                android:id="@+id/item_give_up"
+                android:icon="?android:attr/alertDialogIcon"
+                android:title="Give up" />
         </menu>
     </item>
+
 
 </menu>

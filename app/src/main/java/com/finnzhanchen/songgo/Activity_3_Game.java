@@ -1,7 +1,10 @@
 package com.finnzhanchen.songgo;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -11,11 +14,14 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -23,7 +29,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -31,6 +36,8 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 import com.google.android.gms.maps.OnMapReadyCallback;
+
+import org.w3c.dom.Text;
 
 public class Activity_3_Game extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -63,6 +70,9 @@ public class Activity_3_Game extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+
+
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.game_map);
@@ -76,73 +86,7 @@ public class Activity_3_Game extends AppCompatActivity
                     .build();
         }
 
-/*
-        String song = getIntent().getStringExtra("song_selected");
-        String difficulty = getIntent().getStringExtra("difficulty_selected");
-        Log.e("song", song + difficulty);
 
-        Intent map_intent = new Intent(this, Activity_3_Maps_Fragment.class);
-        map_intent.putExtra("song_selected", song);
-        map_intent.putExtra("difficulty_selected", difficulty);
-        startActivity(map_intent);
-*/
-    }
-
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.activity__game, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
     }
 
 
@@ -215,6 +159,13 @@ public class Activity_3_Game extends AppCompatActivity
             mLastLocation =
                     LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
+            // Add user name to navigation drawer
+            SharedPreferences settings = getSharedPreferences("mysettings",
+                    Context.MODE_PRIVATE);
+            TextView nameBox = (TextView) findViewById(R.id.user_name_text);
+            String name = settings.getString("user_name", "" /*Default*/);
+            nameBox.setText(name);
+
             // When connected, move camera to last known user location
             LatLng myLastLocation = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
             CameraUpdate myLocation = CameraUpdateFactory.newLatLngZoom(myLastLocation, 18);
@@ -249,6 +200,7 @@ public class Activity_3_Game extends AppCompatActivity
         System.out.println(" >>>> onConnectionFailed");
     }
 
+    // Written by me
     private void loadPlacemarksOnMap(String song, String difficulty){
         String url = null;
         switch (difficulty){
@@ -273,5 +225,64 @@ public class Activity_3_Game extends AppCompatActivity
         Log.e("URL", url);
         new DownloadPlacemarkTask(mMap).execute(url);
     }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            AlertDialog giveUp = AskOption();
+            giveUp.show();
+        }
+    }
+
+
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.item_view_collected_words) {
+            // Handle the camera action
+        } else if (id == R.id.item_guess_song) {
+
+        } else if (id == R.id.item_superpower) {
+
+        } else if (id == R.id.item_give_up) {
+            AlertDialog giveUp = AskOption();
+            giveUp.show();
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    // Code reuse from https://stackoverflow.com/questions/24359667/how-to-disable-back-button-for-particular-activity
+    private AlertDialog AskOption()
+    {
+        AlertDialog myQuittingDialogBox =new AlertDialog.Builder(this)
+                .setTitle("Exit")
+                .setMessage("Are you sure you want to give up?")
+                //.setIcon(R.drawable.delete)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        finish();
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .create();
+        return myQuittingDialogBox;
+
+    }
+
+
 
 }
