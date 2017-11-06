@@ -43,8 +43,8 @@ public class Activity_1_Start extends AppCompatActivity {
     }
 
     /** Called when the user taps the Tutorial button */
-    public void buttonTutorial(View view) {
-        Intent intent = new Intent(this,Activity_4_View_Collected_Song.class);
+    public void buttonAchievement(View view) {
+        Intent intent = new Intent(this,Activity_7_Achievement.class);
         startActivity(intent);
 
     }

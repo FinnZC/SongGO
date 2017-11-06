@@ -17,11 +17,11 @@ public class Activity_4_View_Collected_Song extends AppCompatActivity {
         ExpandableListView expandList = findViewById(R.id.expanded_list_view);
         ExpandableListViewAdapter_V2 adapter =
                 new ExpandableListViewAdapter_V2(this,
-                        getIntent().getStringArrayListExtra("unclassified_placemarks"),
-                        getIntent().getStringArrayListExtra("veryinteresting_placemarks"),
-                        getIntent().getStringArrayListExtra("interesting_placemarks"),
-                        getIntent().getStringArrayListExtra("notboring_placemarks"),
-                        getIntent().getStringArrayListExtra("boring_placemarks"));
+                        getIntent().getStringArrayListExtra("unclassified_words"),
+                        getIntent().getStringArrayListExtra("veryinteresting_words"),
+                        getIntent().getStringArrayListExtra("interesting_words"),
+                        getIntent().getStringArrayListExtra("notboring_words"),
+                        getIntent().getStringArrayListExtra("boring_words"));
 
         expandList.setAdapter(adapter);
 

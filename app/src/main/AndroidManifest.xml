@@ -41,9 +41,19 @@
         <activity android:name=".Activity_2_Choose_Song" />
         <activity
             android:name=".Activity_3_Game"
-            android:label="@string/title_activity_game"
+            android:label="Game Map"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".Activity_4_View_Collected_Song"></activity>
+        <activity
+            android:name=".Activity_4_View_Collected_Song"
+            android:label="View Collected Words" />
+        <activity
+            android:name=".Activity_5_Guess_Song"
+            android:label="Guess Song" />
+        <activity
+            android:name=".Activity_6_Win"
+            android:label="Victory" />
+        <activity android:name=".Activity_7_Achievement"
+                  android:label="Achievement"></activity>
     </application>
 
 </manifest>

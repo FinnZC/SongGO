@@ -40,9 +40,15 @@ import com.google.android.gms.location.LocationServices;
 
 import com.google.android.gms.maps.model.Marker;
 
-import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 // WRITTEN BY ME: FINN ZHAN CHEN
 // ALL THIRD PARTY CODES ARE DOCUMENTED
@@ -56,6 +62,8 @@ public class Activity_3_Game extends AppCompatActivity
 
     // Could use Map to implement Treemap if requires order for logn seach algorithm
     private HashMap<Marker, Placemark> markerMap = new HashMap<Marker, Placemark>();
+    // Lyrics for this song
+    private HashMap<String, String[]> lyrics = new HashMap<String, String[]>();
     // Collected Placemarks
     private ArrayList<Placemark> collected_placemarks = new ArrayList<>();
     private GoogleMap mMap;
@@ -65,8 +73,7 @@ public class Activity_3_Game extends AppCompatActivity
     int capture_circle_radius;
     // Song selected from previous screen
     Song song_selected = null;
-    // Lyrics for this song
-    ArrayList<ArrayList<String>> lyrics = new ArrayList<ArrayList<String>>();
+
 
     private GoogleApiClient mGoogleApiClient;
     private final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
@@ -120,6 +127,7 @@ public class Activity_3_Game extends AppCompatActivity
         try {
             // Visualise current position with a small blue captureCircle
             mMap.setMyLocationEnabled(true);
+
         } catch (SecurityException se) {
             System.out.println("Security exception thrown [onMapReady]");
         }
@@ -159,7 +167,8 @@ public class Activity_3_Game extends AppCompatActivity
                         /*.fillColor(Color.parseColor("#d52133"))*/
 
         //Log.e("song", song + difficulty);
-        loadPlacemarksOnMap(song_selected.number, difficulty);
+        loadPlacemarksOnMap(difficulty);
+        loadSongLyrics();
 
     }
 
@@ -211,9 +220,12 @@ public class Activity_3_Game extends AppCompatActivity
             nameBox.setText(name);
 
             // When connected, move camera to last known user location
-            LatLng myLastLocation = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-            CameraUpdate myLocation = CameraUpdateFactory.newLatLngZoom(myLastLocation, 18);
-            mMap.animateCamera(myLocation);
+            if (mLastLocation != null) {
+                LatLng myLastLocation =
+                        new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                CameraUpdate myLocation = CameraUpdateFactory.newLatLngZoom(myLastLocation, 18);
+                mMap.animateCamera(myLocation);
+            }
 
             // Initialise game properties in navigation drawer view
             NavigationView nav_view = (NavigationView) findViewById(R.id.nav_view);
@@ -227,7 +239,6 @@ public class Activity_3_Game extends AppCompatActivity
             MenuItem difficultyBox = menu.findItem(R.id.item_difficulty);
             String difficulty = getIntent().getStringExtra("difficulty_selected");
             difficultyBox.setTitle("Difficulty: " + difficulty);
-
 
         } else {
             ActivityCompat.requestPermissions(this,
@@ -255,12 +266,7 @@ public class Activity_3_Game extends AppCompatActivity
                 collected_placemarks.add(markerMap.get(marker));
                 marker.remove();
             }
-
-
         }
-
-
-
     }
 
     @Override
@@ -276,29 +282,42 @@ public class Activity_3_Game extends AppCompatActivity
     }
 
     // Written by me
-    private void loadPlacemarksOnMap(String song, String difficulty){
+    private void loadPlacemarksOnMap(String difficulty){
         String url = null;
         switch (difficulty){
             case "Novice":
-                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/" + song + "/map5.kml";
+                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/"
+                        + song_selected.number + "/map5.kml";
                 break;
             case "Easy":
-                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/" + song + "/map4.kml";
+                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/"
+                        + song_selected.number + "/map4.kml";
                 break;
             case "Normal":
-                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/" + song + "/map3.kml";
+                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/"
+                        + song_selected.number + "/map3.kml";
                 break;
             case "Hard":
-                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/" + song + "/map2.kml";
+                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/"
+                        + song_selected.number + "/map2.kml";
                 break;
             case "Extreme":
-                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/" + song + "/map1.kml";
+                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/"
+                        + song_selected.number + "/map1.kml";
                 break;
             default:
                 break;
         }
         Log.e("URL", url);
         new DownloadPlacemarkTask(mMap, markerMap).execute(url);
+    }
+
+    private void loadSongLyrics(){
+        String song_url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/"
+                + song_selected.number + "/words.txt";
+        new DownloadLyricsTask(lyrics).execute(song_url);
+
+
     }
 
     @Override
@@ -322,33 +341,47 @@ public class Activity_3_Game extends AppCompatActivity
 
         if (id == R.id.item_view_collected_words) {
             Intent intent = new Intent(this, Activity_4_View_Collected_Song.class);
-            ArrayList<String> unclassified_placemarks = new ArrayList<>();
-            ArrayList<String> veryinteresting_placemarks = new ArrayList<>();
-            ArrayList<String> interesting_placemarks = new ArrayList<>();
-            ArrayList<String> notboring_placemarks = new ArrayList<>();
-            ArrayList<String> boring_placemarks = new ArrayList<>();
-            String song_url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/"
-                    + song_selected.number + "/words.txt";
 
-            new DownloadLyricsTask(lyrics).execute(song_url);
+            // LinkedHashSet is used to preserve the order in which words are collected
+            // so can be outputted in a order way to user
+            LinkedHashSet<String> unclassified_words = new LinkedHashSet<String>();
+            LinkedHashSet<String> veryinteresting_words = new LinkedHashSet<String>();
+            LinkedHashSet<String> interesting_words = new LinkedHashSet<String>();
+            LinkedHashSet<String> notboring_words = new LinkedHashSet<String>();
+            LinkedHashSet<String> boring_words = new LinkedHashSet<String>();
+            String[] position;
+            String line_number;
+            int word_index;
+            String word;
+
 
             for (Placemark placemark : collected_placemarks){
-                Log.e("Inside FOR loop", "Reached");
+                position = placemark.position.split(":");
+                line_number = position[0];
+                word_index = Integer.parseInt(position[1]) - 1;
+                // -1 because format provided starts with 1
+                word = lyrics.get(line_number)[word_index];
+                /*
+                // print out lyrics hashmap for debugging
+                for (String line : lyrics.keySet()) {
+                    Log.e("Lyrics", line + " " + Arrays.toString(lyrics.get(line)));
+                }
+                */
                 switch (placemark.description){
                     case "unclassified":
-                        unclassified_placemarks.add(placemark.position);
+                        unclassified_words.add(word);
                         break;
                     case "veryinteresting":
-                        veryinteresting_placemarks.add(placemark.position);
+                        veryinteresting_words.add(word);
                         break;
                     case "interesting":
-                        interesting_placemarks.add(placemark.position);
+                        interesting_words.add(word);
                         break;
                     case "notboring":
-                        notboring_placemarks.add(placemark.position);
+                        notboring_words.add(word);
                         break;
                     case "boring":
-                        boring_placemarks.add(placemark.position);
+                        boring_words.add(word);
                         break;
                     default:
                         break;
@@ -356,19 +389,22 @@ public class Activity_3_Game extends AppCompatActivity
             }
 
             intent.putStringArrayListExtra(
-                    "unclassified_placemarks", unclassified_placemarks);
+                    "unclassified_words",new ArrayList<String>(unclassified_words));
             intent.putStringArrayListExtra(
-                    "veryinteresting_placemarks", veryinteresting_placemarks);
+                    "veryinteresting_words", new ArrayList<String>(veryinteresting_words));
             intent.putStringArrayListExtra(
-                    "interesting_placemarks", interesting_placemarks);
+                    "interesting_words", new ArrayList<String>(interesting_words));
             intent.putStringArrayListExtra(
-                    "notboring_placemarks", notboring_placemarks);
+                    "notboring_words", new ArrayList<String>(notboring_words));
             intent.putStringArrayListExtra(
-                    "boring_placemarks", boring_placemarks);
+                    "boring_words", new ArrayList<String>(boring_words));
 
             startActivity(intent);
 
         } else if (id == R.id.item_guess_song) {
+            Intent intent = new Intent(this, Activity_5_Guess_Song.class);
+            intent.putExtra("song_selected", song_selected);
+            startActivity(intent);
 
         } else if (id == R.id.item_superpower) {
 
@@ -380,6 +416,10 @@ public class Activity_3_Game extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void viewCollectedWords(){
+
     }
 
     // Code reuse from https://stackoverflow.com/questions/24359667/how-to-disable-back-button-for-particular-activity

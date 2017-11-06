@@ -60,31 +60,31 @@ public class DownloadPlacemarkTask extends AsyncTask<String, Void, List<Placemar
                 case "#veryinteresting":
                     marker = map.addMarker(new MarkerOptions()
                             .position(placemark.point)
-                            .title(placemark.position)
+                            .title(placemark.description)
                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.very_interesting)));
                     break;
                 case "#interesting":
                     marker = map.addMarker(new MarkerOptions()
                             .position(placemark.point)
-                            .title(placemark.position)
+                            .title(placemark.description)
                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.interesting)));
                     break;
                 case "#notboring":
                     marker = map.addMarker(new MarkerOptions()
                             .position(placemark.point)
-                            .title(placemark.position)
+                            .title(placemark.description)
                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.notboring)));
                     break;
                 case "#boring":
                     marker = map.addMarker(new MarkerOptions()
                             .position(placemark.point)
-                            .title(placemark.position)
+                            .title(placemark.description)
                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.boring)));
                     break;
                 case "#unclassified":
                     marker = map.addMarker(new MarkerOptions()
                             .position(placemark.point)
-                            .title(placemark.position)
+                            .title(placemark.description)
                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.unclassified)));
                     break;
                 default:
