@@ -7,7 +7,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.TextView;
 
 public class Activity_1_Start extends AppCompatActivity {
 
@@ -45,7 +44,7 @@ public class Activity_1_Start extends AppCompatActivity {
 
     /** Called when the user taps the Tutorial button */
     public void buttonTutorial(View view) {
-        Intent intent = new Intent(this,Activity_3_Game.class);
+        Intent intent = new Intent(this,Activity_4_View_Collected_Song.class);
         startActivity(intent);
 
     }

@@ -16,8 +16,9 @@ import java.util.List;
  * Created by chen on 02/11/2017.
  */
 
+// WRITTEN BY ME: FINN ZHAN CHEN
+// ALL THIRD PARTY CODES ARE DOCUMENTED
 public class XmlSongParser {
-    // We don’t use namespaces
     private static final String ns = null;
 
     public List<Song> parse(InputStream in) throws XmlPullParserException, IOException{

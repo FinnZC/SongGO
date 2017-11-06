@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -13,25 +14,28 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
 
 
-//SOFWARE ENGINEERLING LARGE PRACTICAL LECTURE 4
-//WHERE MY OWN CODE STARTS IS DOCUMENTED
 
+// WRITTEN BY ME: FINN ZHAN CHEN
+// ALL THIRD PARTY CODES ARE DOCUMENTED
 
 public class DownloadPlacemarkTask extends AsyncTask<String, Void, List<Placemark>> {
 
     GoogleMap map;
+    HashMap<Marker, Placemark> markerMap;
 
-    public DownloadPlacemarkTask(GoogleMap map){
+    public DownloadPlacemarkTask(GoogleMap map, HashMap<Marker, Placemark> markerMap){
         this.map = map;
+        this.markerMap = markerMap;
     }
 
+    // CODE FROM UNIVERSITY OF EDINBURGH SOFTWARE ENGINEERING LARGE PRACTICAL LECTURE 4
     @Override
     protected List<Placemark> doInBackground(String... urls) {
         try {
-
             return loadXmlFromNetwork(urls[0]);
         } catch (IOException e) {
             Log.e("Enter", "Entered exception");
@@ -42,52 +46,66 @@ public class DownloadPlacemarkTask extends AsyncTask<String, Void, List<Placemar
         }
     }
 
+    // WRITTEN BY ME: FINN ZHAN CHEN
     @Override
     protected void onPostExecute(List<Placemark> result) {
-        // Do something with result
+        Marker marker = null;
         for (Placemark placemark: result){
             //Log.e("Placemark", placemark.description + " " + placemark.position + " " + placemark.styleUrl);
+            // Save Placemarks in a dictionary of Markers so the reference of the marker
+            // is used to remove the marker on the map and also keeps a reference of other
+            // important information
+
             switch (placemark.styleUrl){
                 case "#veryinteresting":
-                    map.addMarker(new MarkerOptions()
+                    marker = map.addMarker(new MarkerOptions()
                             .position(placemark.point)
-                            .title(placemark.description)
+                            .title(placemark.position)
                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.very_interesting)));
                     break;
                 case "#interesting":
-                    map.addMarker(new MarkerOptions()
+                    marker = map.addMarker(new MarkerOptions()
                             .position(placemark.point)
-                            .title(placemark.description)
+                            .title(placemark.position)
                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.interesting)));
                     break;
                 case "#notboring":
-                    map.addMarker(new MarkerOptions()
+                    marker = map.addMarker(new MarkerOptions()
                             .position(placemark.point)
-                            .title(placemark.description)
+                            .title(placemark.position)
                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.notboring)));
                     break;
                 case "#boring":
-                    map.addMarker(new MarkerOptions()
+                    marker = map.addMarker(new MarkerOptions()
                             .position(placemark.point)
-                            .title(placemark.description)
+                            .title(placemark.position)
                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.boring)));
                     break;
                 case "#unclassified":
-                    map.addMarker(new MarkerOptions()
+                    marker = map.addMarker(new MarkerOptions()
                             .position(placemark.point)
-                            .title(placemark.description)
+                            .title(placemark.position)
                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.unclassified)));
                     break;
                 default:
+                    marker = null;
                     break;
             }
+            if (marker != null && !markerMap.containsKey(marker)) {
+                markerMap.put(marker, placemark);
+            }
+
+            /* Test that it actually removes the markers
+            for (Marker mark: markerMap.keySet()){
+                mark.remove();
+            }
+            */
         }
     }
-
+    // WRITTEN BY ME: FINN ZHAN CHEN
     private List<Placemark> loadXmlFromNetwork(String urlString) throws
             XmlPullParserException, IOException {
         List<Placemark> placemarks;
-        Log.e("Enter", "Entered load");
         try (InputStream stream = downloadUrl(urlString)){
             XmlPlacemarkParser parser = new XmlPlacemarkParser();
             placemarks = parser.parse(stream);
@@ -95,8 +113,8 @@ public class DownloadPlacemarkTask extends AsyncTask<String, Void, List<Placemar
         return placemarks;
     }
 
-    // Given a string representation of a URL, sets up a connection and gets
-    // an input stream.
+    // CODE FROM UNIVERSITY OF EDINBURGH SOFTWARE ENGINEERING LARGE PRACTICAL LECTURE 4
+    // Given a string representation of a URL, sets up a connection and gets an input stream.
     private InputStream downloadUrl(String urlString) throws IOException {
         URL url = new URL(urlString);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -109,6 +127,4 @@ public class DownloadPlacemarkTask extends AsyncTask<String, Void, List<Placemar
         conn.connect();
         return conn.getInputStream();
     }
-
-
 }

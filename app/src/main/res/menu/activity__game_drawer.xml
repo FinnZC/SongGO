@@ -5,14 +5,20 @@
     tools:showIn="navigation_view">
 
     <item
-        android:id="@+id/item_guess_remaining"
-        android:title="Guess Remaining: " />
+        android:id="@+id/item_song"
+        android:title="Song: " />
     <item
         android:id="@+id/item_difficulty"
         android:title="Difficulty: " />
     <item
         android:id="@+id/item_clock"
         android:title="Clock: " />
+    <item
+        android:id="@+id/item_guess_remaining"
+        android:title="Guess Remaining: 5" />
+    <item
+        android:id="@+id/item_superpower_remainin"
+        android:title="Superpower Remaining: 3" />
     <item android:title="Available Actions">
         <menu>
             <item
