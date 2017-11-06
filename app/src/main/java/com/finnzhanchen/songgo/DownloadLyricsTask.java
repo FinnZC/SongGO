@@ -3,22 +3,15 @@ package com.finnzhanchen.songgo;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-
-import org.xmlpull.v1.XmlPullParserException;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.Arrays;
 
 
 
@@ -35,25 +28,25 @@ public class DownloadLyricsTask extends AsyncTask<String, Void, InputStream> {
     // CODE FROM UNIVERSITY OF EDINBURGH SOFTWARE ENGINEERING LARGE PRACTICAL LECTURE 4
     @Override
     protected InputStream doInBackground(String... urls) {
+        InputStream stream = null;
         try {
-            return downloadUrl(urls[0]);
+            stream = downloadUrl(urls[0]);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+            String line;
+            while ((line = reader.readLine()) != null){
+                    String[] words = line.split(" ");
+                    Log.e("Words: ", Arrays.toString(words));
+            }
         } catch (IOException e) {
-            Log.e("Enter", "Entered exception");
-            return null;
+            e.printStackTrace();
         }
+        return stream;
     }
 
     // WRITTEN BY ME: FINN ZHAN CHEN
     @Override
     protected void onPostExecute(InputStream result) {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(result));
-        String line;
-        try {
-            while ((line = reader.readLine()) != null) {
 
-
-            }
-        }
     }
 
     // CODE FROM UNIVERSITY OF EDINBURGH SOFTWARE ENGINEERING LARGE PRACTICAL LECTURE 4
