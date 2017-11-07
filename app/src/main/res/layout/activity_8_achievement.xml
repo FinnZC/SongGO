@@ -4,14 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.finnzhanchen.songgo.Activity_7_Achievement">
+    tools:context="com.finnzhanchen.songgo.Activity_8_Achievement">
 
     <TextView
         android:id="@+id/textView7"
         android:layout_width="324dp"
         android:layout_height="88dp"
         android:layout_marginTop="16dp"
-        android:text="06/11/2017: \nFinn - Novice \nBohemian Rhapsody by Queen"
+        android:text='06/11/2017: \nFinn - Novice \n"Bohemian Rhapsody" by Queen'
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"

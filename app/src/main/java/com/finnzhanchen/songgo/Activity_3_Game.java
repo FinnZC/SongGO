@@ -39,6 +39,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.PolygonOptions;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -165,6 +166,17 @@ public class Activity_3_Game extends AppCompatActivity
                 .radius(capture_circle_radius)
                 .strokeColor(Color.parseColor("#d52133")));
                         /*.fillColor(Color.parseColor("#d52133"))*/
+
+        // Instantiates a new Polyline object and adds points to define a rectangle
+        // representing the area of the game map
+        PolygonOptions rectOptions = new PolygonOptions()
+                .add(new LatLng(55.946233 ,-3.192473),
+                        new LatLng(55.946233, -3.184319),
+                        new LatLng(55.942617, -3.184319),
+                        new LatLng(55.942617, -3.192473),
+                        new LatLng(55.946233, -3.192473))
+                .strokeColor(Color.parseColor("#d52133"));
+        mMap.addPolygon(rectOptions);
 
         //Log.e("song", song + difficulty);
         loadPlacemarksOnMap(difficulty);

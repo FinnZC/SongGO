@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,8 +21,8 @@ public class Activity_5_Guess_Song extends AppCompatActivity {
 
     /** Called when the user taps the Submit button */
     public void buttonSubmit(View view) {
-        TextView textBoxInputSong = (TextView) findViewById(R.id.button_guess_song);
-        String song = (String) textBoxInputSong.getText();
+        TextView textBoxInputSong = (TextView) findViewById(R.id.text_input_song);
+        String song = textBoxInputSong.getText().toString();
         Song song_selected = (Song) getIntent().getSerializableExtra("song_selected");
 
         if (song_selected.title.equals(song)){

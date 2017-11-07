@@ -33,7 +33,7 @@
             <item
                 android:id="@+id/item_give_up"
                 android:icon="?android:attr/alertDialogIcon"
-                android:title="Give up" />
+                android:title="Give Up" />
         </menu>
     </item>
 

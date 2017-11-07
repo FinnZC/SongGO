@@ -11,7 +11,6 @@ public class Activity_4_View_Collected_Song extends AppCompatActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.e("Activity", "4 Reached");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_4_view_collected_song);
         ExpandableListView expandList = findViewById(R.id.expanded_list_view);

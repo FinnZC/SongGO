@@ -52,8 +52,11 @@
         <activity
             android:name=".Activity_6_Win"
             android:label="Victory" />
-        <activity android:name=".Activity_7_Achievement"
-                  android:label="Achievement"></activity>
+        <activity
+            android:name=".Activity_8_Achievement"
+            android:label="Achievement" />
+        <activity android:name=".Activity_7_Lose"
+            android:label="Game Over" ></activity>
     </application>
 
 </manifest>
