@@ -69,8 +69,8 @@ public class Activity_3_Game extends AppCompatActivity
     private ArrayList<Placemark> collected_placemarks = new ArrayList<>();
     private GoogleMap mMap;
     // Add coloured captureCircle with radius circle_radius around current location.
-    // All markers within the radius are captured
     Circle captureCircle;
+    // All markers within the radius are captured
     int capture_circle_radius;
     // Song selected from previous screen
     Song song_selected = null;
@@ -86,6 +86,7 @@ public class Activity_3_Game extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_3_game);
+        // Code template provided by the Navigation Drawer Activity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -165,7 +166,6 @@ public class Activity_3_Game extends AppCompatActivity
                 .center(new LatLng(0, 0))
                 .radius(capture_circle_radius)
                 .strokeColor(Color.parseColor("#d52133")));
-                        /*.fillColor(Color.parseColor("#d52133"))*/
 
         // Instantiates a new Polyline object and adds points to define a rectangle
         // representing the area of the game map
@@ -239,7 +239,7 @@ public class Activity_3_Game extends AppCompatActivity
                 mMap.animateCamera(myLocation);
             }
 
-            // Initialise game properties in navigation drawer view
+            // Initialise game properties in Navigation Drawer view
             NavigationView nav_view = (NavigationView) findViewById(R.id.nav_view);
             Menu menu = nav_view.getMenu();
 

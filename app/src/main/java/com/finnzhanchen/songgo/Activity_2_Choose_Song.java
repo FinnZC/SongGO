@@ -21,7 +21,6 @@ public class Activity_2_Choose_Song extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_2_choose_song);
         String song_url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/songs.xml";
-        String map_url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/01/map1.kml";
         new DownloadSongTask(this, songMap).execute(song_url);
     }
 

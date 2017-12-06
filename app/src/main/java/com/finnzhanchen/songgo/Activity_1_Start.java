@@ -46,6 +46,5 @@ public class Activity_1_Start extends AppCompatActivity {
     public void buttonAchievement(View view) {
         Intent intent = new Intent(this,Activity_8_Achievement.class);
         startActivity(intent);
-
     }
 }
