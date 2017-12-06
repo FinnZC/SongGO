@@ -3,15 +3,21 @@ package com.finnzhanchen.songgo;
 import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -23,31 +29,57 @@ import java.util.List;
 //WHERE MY OWN CODE STARTS IS DOCUMENTED
 
 
-public class DownloadEverythingTask extends AsyncTask<String, Void, List<Song>> {
+public class DownloadEverythingTask extends AsyncTask<String, Void, Void> {
     Activity callingActivity = new Activity();
-    HashMap<String, Song> songMap = new HashMap<String, Song>();
 
-    public DownloadEverythingTask(Activity callingActivity, HashMap<String, Song> songMap){
+    public DownloadEverythingTask(Activity callingActivity){
         this.callingActivity = callingActivity;
-        this.songMap = songMap;
     }
 
     @Override
-    protected List<Song> doInBackground(String... urls) {
-        List<Song> songs = new ArrayList<Song>();
-        try {
-            songs = loadXmlSongsFromNetwork(urls[0]);
-        } catch (IOException|XmlPullParserException e) {
-            e.printStackTrace();
+    protected Void doInBackground(String... urls) {
+        if (Connectivity.isConnectedWifi(callingActivity) || Connectivity.isConnectedMobile(callingActivity)){
+            if (!isSameVersion()){
+                try {
+                    List<Song> songs = loadXmlSongsFromNetwork(urls[0]);
+                    downloadAllSongsToInternalStorage(songs);
+                } catch (IOException|XmlPullParserException e) {
+                    e.printStackTrace();
+                }
+            }
+        } else{
+            Log.e("Connectivity:", "No WiFi nor 4G detected. Using maps from internal" +
+                    "storage");
         }
-        return songs;
+
+        return null;
     }
 
-    @Override
-    protected void onPostExecute(List<Song> songsList) {
-        updateUserInterfaceSpinners(songsList);
-        downloadAllSongsToInternalStorage(songsList);
 
+    private boolean isSameVersion(){
+        String xmlPath = callingActivity.getFilesDir() + "/SongsXML";
+        File xmlFile = new File(xmlPath);
+        // Check if song.xml exists in the internal storage
+        if (xmlFile.exists() && !xmlFile.isDirectory()){
+            try {
+                BufferedReader localSongXML = new BufferedReader(new FileReader(xmlFile));
+                URL songURL = new URL("http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/songs.xml");
+                BufferedReader onlineSongXML = new BufferedReader(new InputStreamReader(songURL.openStream()));
+                // Ignore the first line which is "<?xml version="1.0" encoding="UTF-8"?>"
+                localSongXML.readLine();
+                onlineSongXML.readLine();
+                // The second time includes the timestamp
+                if (localSongXML.readLine().equals(onlineSongXML.readLine())){
+                    Log.e("Is same version?", "YES!");
+                    // Same timestamp so return true.
+                    return true;
+                }
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+        Log.e("Is same version?", "NO!");
+        return false;
     }
 
     private List<Song> loadXmlSongsFromNetwork(String urlString) throws
@@ -61,64 +93,47 @@ public class DownloadEverythingTask extends AsyncTask<String, Void, List<Song>> 
         return songs;
     }
 
-    private void updateUserInterfaceSpinners(List<Song> result) {
-        Spinner spinner_song = (Spinner) callingActivity.findViewById(R.id.spinner_song);
-        // Spinner Drop down elements
-        List<String> song_spinner_data = new ArrayList<>();
-        for (Song song : result){
-            song_spinner_data.add(song.number);
-            /* + " " + song.title + " " + song.artist + " " + song.link*/
-            // Save a hashmap for further processing later
-            songMap.put(song.number, song);
-        }
-        // Creating adapter for spinner
-        ArrayAdapter<String> dataAdapter_song =
-                new ArrayAdapter<String>(callingActivity,
-                        android.R.layout.simple_spinner_item, song_spinner_data);
-        // Drop down layout style - list view with radio button
-        dataAdapter_song.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        // attaching data adapter to spinner
-        spinner_song.setAdapter(dataAdapter_song);
 
-        // Spinner element for difficulty
-        Spinner spinner_difficulty = (Spinner) callingActivity.findViewById(R.id.spinner_difficulty);
-        // Spinner Drop down elements
-        String[] difficulties = new String[] {"Novice", "Easy", "Normal", "Hard", "Extreme"};
-        // Creating adapter for spinner
-        ArrayAdapter<String> dataAdapter_difficulty = new ArrayAdapter<String>(
-                callingActivity, android.R.layout.simple_spinner_item, difficulties);
-        dataAdapter_difficulty.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        // attaching data adapter to spinner
-        spinner_difficulty.setAdapter(dataAdapter_difficulty);
-    }
+
 
     private void downloadAllSongsToInternalStorage(List<Song> songsList){
+        saveFile("http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/songs.xml"
+                , "SongsXML");
         for (Song song : songsList){
             for (int i = 1; i <= 5 ; i++){
-                String url = String.format("http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/%d/map%d.kml", song.number, i);
-                try {
-                    // Name of the output file inputStream the url, literally saving a copy of the url in
-                    // internal storage
-                    InputStream inputStream = downloadUrl(url);
-                    FileOutputStream outputStream = callingActivity.openFileOutput(url, Context.MODE_PRIVATE);
-                    byte[] buffer = new byte[1024];
-                    int bytesRead;
-                    //read from inputStream to buffer
-                    while((bytesRead = inputStream.read(buffer)) !=-1){
-                        outputStream.write(buffer, 0, bytesRead);
-                    }
-                    inputStream.close();
-                    //flush OutputStream to write any buffered data to file
-                    outputStream.flush();
-                    outputStream.close();
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-
+                String url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/"
+                        + song.number + "/map" + i + ".kml";
+                // Output file names are of format "Song1-Map1"
+                String outputFileName = "Song" + song.number + "-Map" + i;
+                Log.e("Stage downloadAllSongs", "Song: " + song.number +"Map: " + i);
+                saveFile(url, outputFileName);
             }
+            saveFile("http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/"
+                    + song.number + "/words.txt", "Lyrics" + song.number);
+        }
+    }
 
+    private void saveFile(String url, String outputFileName){
+        try {
+            // Name of the output file inputStream the url, literally saving a copy of the url in
+            // internal storage
+            InputStream inputStream = downloadUrl(url);
+            File outputFile = new File(callingActivity.getFilesDir(), outputFileName);
+            Log.e("Path of saved output", outputFile.getPath());
+            FileOutputStream outputStream = callingActivity.openFileOutput(outputFileName, Context.MODE_PRIVATE);
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            //read from inputStream to buffer
+            while((bytesRead = inputStream.read(buffer)) !=-1){
+                outputStream.write(buffer, 0, bytesRead);
+            }
+            inputStream.close();
+            //flush OutputStream to write any buffered data to file
+            outputStream.flush();
+            outputStream.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

@@ -1,9 +1,6 @@
 package com.finnzhanchen.songgo;
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,8 +17,7 @@ public class Activity_2_Choose_Song extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_2_choose_song);
-        String song_url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/songs.xml";
-        new DownloadSongTask(this, songMap).execute(song_url);
+        new LoadSongTask(this, songMap).execute();
     }
 
     /** Called when the user taps the GO button */
@@ -64,5 +60,30 @@ public class Activity_2_Choose_Song extends AppCompatActivity {
 
         startActivity(intent);
     }
+
+    /* Test only
+    private void readSong() {
+        for (String name :this.fileList()){
+            Log.e("File", name);
+        }
+
+        Log.e("readSong", "reached");
+        try {
+            String yourFilePath = this.getFilesDir() + "/" + "Song01-Map1";
+
+            File yourFile = new File( yourFilePath );
+
+            BufferedReader br = new BufferedReader(new FileReader(yourFile));
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                Log.e("Content", line);
+            }
+
+        } catch (IOException e) {
+            Log.e("Exception", "reached");
+            e.printStackTrace();
+        }
+    }
+    */
 }
 

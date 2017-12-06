@@ -41,6 +41,9 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.PolygonOptions;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -111,6 +114,8 @@ public class Activity_3_Game extends AppCompatActivity
                     .addApi(LocationServices.API)
                     .build();
         }
+
+        //seeFileLists();
     }
 
 
@@ -456,6 +461,10 @@ public class Activity_3_Game extends AppCompatActivity
 
     }
 
-
-
+    // For testing only
+    private void seeFileLists() {
+        for (String name :this.fileList()){
+            Log.e("File", name);
+        }
+    }
 }

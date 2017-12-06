@@ -5,8 +5,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 
 public class Activity_1_Start extends AppCompatActivity {
 
@@ -22,6 +30,9 @@ public class Activity_1_Start extends AppCompatActivity {
                 Context.MODE_PRIVATE);
         String name = settings.getString("user_name", "" /*Default*/);
         nameBox.setText(name);
+
+        String song_url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/songs.xml";
+        new DownloadEverythingTask(this).execute(song_url);
 
     }
 
@@ -47,4 +58,5 @@ public class Activity_1_Start extends AppCompatActivity {
         Intent intent = new Intent(this,Activity_8_Achievement.class);
         startActivity(intent);
     }
+
 }

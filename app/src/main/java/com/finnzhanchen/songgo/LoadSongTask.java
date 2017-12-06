@@ -8,10 +8,10 @@ import android.widget.Spinner;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,32 +21,51 @@ import java.util.List;
 //WHERE MY OWN CODE STARTS IS DOCUMENTED
 
 
-public class DownloadSongTask extends AsyncTask<String, Void, List<Song>> {
+public class LoadSongTask extends AsyncTask<String, Void, List<Song>> {
     Activity callingActivity = new Activity();
     HashMap<String, Song> songMap = new HashMap<String, Song>();
 
-    public DownloadSongTask(Activity callingActivity, HashMap<String, Song> songMap){
+    public LoadSongTask(Activity callingActivity, HashMap<String, Song> songMap){
         this.callingActivity = callingActivity;
         this.songMap = songMap;
     }
 
     @Override
     protected List<Song> doInBackground(String... urls) {
+        List<Song> songs = new ArrayList<Song>();
         try {
-            return loadXmlFromNetwork(urls[0]);
-        } catch (IOException e) {
-            return null;
-        } catch (XmlPullParserException e) {
-            return null;
+            return loadXmlFromInternalStorage();
+        } catch (IOException|XmlPullParserException e) {
+            e.printStackTrace();
         }
+        return songs;
     }
 
     @Override
-    protected void onPostExecute(List<Song> result) {
+    protected void onPostExecute(List<Song> songList) {
+        Log.e("SongList Size: ", songList.size() + "");
+        if (songList.size() > 0) updateUserInterfaceSpinners(songList);
+    }
+
+    private List<Song> loadXmlFromInternalStorage() throws
+            XmlPullParserException, IOException {
+        List<Song> songs;
+        String xmlPath = callingActivity.getFilesDir() + "/SongsXML";
+        File file = new File( xmlPath );
+        try (InputStream stream = new FileInputStream(file)){
+            // Do something with stream e.g. parse as XML, build result
+            XmlSongParser parser = new XmlSongParser();
+            songs = parser.parse(stream);
+        }
+        return songs;
+    }
+
+
+    private void updateUserInterfaceSpinners(List<Song> songList) {
         Spinner spinner_song = (Spinner) callingActivity.findViewById(R.id.spinner_song);
         // Spinner Drop down elements
         List<String> song_spinner_data = new ArrayList<>();
-        for (Song song : result){
+        for (Song song : songList){
             song_spinner_data.add(song.number);
             /* + " " + song.title + " " + song.artist + " " + song.link*/
             // Save a hashmap for further processing later
@@ -71,32 +90,6 @@ public class DownloadSongTask extends AsyncTask<String, Void, List<Song>> {
         dataAdapter_difficulty.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // attaching data adapter to spinner
         spinner_difficulty.setAdapter(dataAdapter_difficulty);
-    }
-
-    private List<Song> loadXmlFromNetwork(String urlString) throws
-            XmlPullParserException, IOException {
-        List<Song> songs;
-        try (InputStream stream = downloadUrl(urlString)){
-            // Do something with stream e.g. parse as XML, build result
-            XmlSongParser parser = new XmlSongParser();
-            songs = parser.parse(stream);
-        }
-        return songs;
-    }
-
-    // Given a string representation of a URL, sets up a connection and gets
-    // an input stream.
-    private InputStream downloadUrl(String urlString) throws IOException {
-        URL url = new URL(urlString);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        // Also available: HttpsURLConnection
-        conn.setReadTimeout(10000 /* milliseconds */);
-        conn.setConnectTimeout(15000 /* milliseconds */);
-        conn.setRequestMethod("GET");
-        conn.setDoInput(true);
-        // Starts the query
-        conn.connect();
-        return conn.getInputStream();
     }
 
 
