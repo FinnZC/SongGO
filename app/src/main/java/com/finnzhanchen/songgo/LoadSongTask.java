@@ -21,7 +21,7 @@ import java.util.List;
 //WHERE MY OWN CODE STARTS IS DOCUMENTED
 
 
-public class LoadSongTask extends AsyncTask<String, Void, List<Song>> {
+public class LoadSongTask extends AsyncTask<Void, Void, List<Song>> {
     Activity callingActivity = new Activity();
     HashMap<String, Song> songMap = new HashMap<String, Song>();
 
@@ -31,23 +31,21 @@ public class LoadSongTask extends AsyncTask<String, Void, List<Song>> {
     }
 
     @Override
-    protected List<Song> doInBackground(String... urls) {
-        List<Song> songs = new ArrayList<Song>();
+    protected List<Song> doInBackground(Void... params) {
         try {
-            return loadXmlFromInternalStorage();
+            return loadSongsFromInternalStorage();
         } catch (IOException|XmlPullParserException e) {
             e.printStackTrace();
         }
-        return songs;
+        return null;
     }
 
     @Override
     protected void onPostExecute(List<Song> songList) {
-        Log.e("SongList Size: ", songList.size() + "");
-        if (songList.size() > 0) updateUserInterfaceSpinners(songList);
+        if (songList != null) updateUserInterfaceSpinners(songList);
     }
 
-    private List<Song> loadXmlFromInternalStorage() throws
+    private List<Song> loadSongsFromInternalStorage() throws
             XmlPullParserException, IOException {
         List<Song> songs;
         String xmlPath = callingActivity.getFilesDir() + "/SongsXML";
@@ -59,7 +57,6 @@ public class LoadSongTask extends AsyncTask<String, Void, List<Song>> {
         }
         return songs;
     }
-
 
     private void updateUserInterfaceSpinners(List<Song> songList) {
         Spinner spinner_song = (Spinner) callingActivity.findViewById(R.id.spinner_song);
@@ -91,6 +88,4 @@ public class LoadSongTask extends AsyncTask<String, Void, List<Song>> {
         // attaching data adapter to spinner
         spinner_difficulty.setAdapter(dataAdapter_difficulty);
     }
-
-
 }

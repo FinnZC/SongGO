@@ -21,7 +21,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ExpandableListView;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -41,18 +40,9 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.PolygonOptions;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
 
 // WRITTEN BY ME: FINN ZHAN CHEN
 // ALL THIRD PARTY CODES ARE DOCUMENTED
@@ -300,41 +290,35 @@ public class Activity_3_Game extends AppCompatActivity
 
     // Written by me
     private void loadPlacemarksOnMap(String difficulty){
-        String url = null;
+        String fileName = null;
         switch (difficulty){
             case "Novice":
-                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/"
-                        + song_selected.number + "/map5.kml";
+                fileName = "Song" + song_selected.number + "-Map5";
                 break;
             case "Easy":
-                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/"
-                        + song_selected.number + "/map4.kml";
+                fileName = "Song" + song_selected.number + "-Map4";
                 break;
             case "Normal":
-                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/"
-                        + song_selected.number + "/map3.kml";
+                fileName = "Song" + song_selected.number + "-Map3";
                 break;
             case "Hard":
-                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/"
-                        + song_selected.number + "/map2.kml";
+                fileName = "Song" + song_selected.number + "-Map2";
                 break;
             case "Extreme":
-                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/"
-                        + song_selected.number + "/map1.kml";
+                fileName = "Song" + song_selected.number + "-Map1";
                 break;
             default:
+                Log.e("ERROR:", "Difficulty selected not an option");
                 break;
         }
-        Log.e("URL", url);
-        new DownloadPlacemarkTask(mMap, markerMap).execute(url);
+        Log.e("FileName:", fileName);
+        if (fileName!=null)
+            new LoadPlacemarkTask(this, mMap, markerMap).execute(fileName);
     }
 
     private void loadSongLyrics(){
-        String song_url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/"
-                + song_selected.number + "/words.txt";
-        new DownloadLyricsTask(lyrics).execute(song_url);
-
-
+        String fileName = "Lyrics" + song_selected.number;
+        new LoadLyricsTask(this, lyrics).execute(fileName);
     }
 
     @Override

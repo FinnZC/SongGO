@@ -8,6 +8,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,6 +18,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.List;
 
 public class Activity_1_Start extends AppCompatActivity {
 
@@ -28,12 +32,24 @@ public class Activity_1_Start extends AppCompatActivity {
         EditText nameBox = (EditText) findViewById(R.id.name_box);
         SharedPreferences settings = getSharedPreferences("mysettings",
                 Context.MODE_PRIVATE);
-        String name = settings.getString("user_name", "" /*Default*/);
+        String name = settings.getString("user_name", "" /*Default value */);
         nameBox.setText(name);
 
-        String song_url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/songs.xml";
-        new DownloadEverythingTask(this).execute(song_url);
-
+        if (Connectivity.isConnectedWifi(this) || Connectivity.isConnectedMobile(this)){
+            String song_url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/songs.xml";
+            new DownloadEverythingTask(this).execute(song_url);
+        } else{
+            Log.e("Connectivity:", "No WiFi nor 4G detected. Using maps from internal" +
+                    "storage");
+            // Telling users that no internet connection is detected so the game will use
+            // downloaded maps. If no maps are downloaded, then user cannot select any map.
+            Context context = getApplicationContext();
+            CharSequence text = "No WiFi nor 4G detected. Using maps from internal storage.If no map" +
+                    "is downloaded then you cannot select a map to play :(";
+            int duration = Toast.LENGTH_LONG;
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+        }
     }
 
     /** Called when the user taps the Start button */
@@ -44,13 +60,24 @@ public class Activity_1_Start extends AppCompatActivity {
                 Context.MODE_PRIVATE);
 
         SharedPreferences.Editor editor = settings.edit();
-        editor.putString("mystring", "wahay");
         editor.putString("user_name", nameBox.getText().toString());
-        editor.commit();
+        editor.apply();
 
-        Intent intent = new Intent(this, Activity_2_Choose_Song.class);
-        startActivity(intent);
-        
+
+        //Check if there are any maps downloaded
+        Boolean map_exists = settings.getBoolean("map_exists", false /*Default value */);
+
+        if (map_exists){
+            Intent intent = new Intent(this, Activity_2_Choose_Song.class);
+            startActivity(intent);
+        } else {
+            // Telling user that there are no maps to play
+            Context context = getApplicationContext();
+            CharSequence text = "There are no maps to play. Please connect to the Internet!";
+            int duration = Toast.LENGTH_LONG;
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+        }
     }
 
     /** Called when the user taps the Tutorial button */

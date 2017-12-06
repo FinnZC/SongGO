@@ -2,10 +2,12 @@ package com.finnzhanchen.songgo;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -38,21 +40,27 @@ public class DownloadEverythingTask extends AsyncTask<String, Void, Void> {
 
     @Override
     protected Void doInBackground(String... urls) {
-        if (Connectivity.isConnectedWifi(callingActivity) || Connectivity.isConnectedMobile(callingActivity)){
-            if (!isSameVersion()){
-                try {
-                    List<Song> songs = loadXmlSongsFromNetwork(urls[0]);
-                    downloadAllSongsToInternalStorage(songs);
-                } catch (IOException|XmlPullParserException e) {
-                    e.printStackTrace();
-                }
+        if (!isSameVersion()){
+            try {
+                // Get a list of all available songs and download them to internal storage.
+                List<Song> songs = loadXmlSongsFromNetwork(urls[0]);
+                downloadAllSongsToInternalStorage(songs);
+            } catch (IOException|XmlPullParserException e) {
+                e.printStackTrace();
             }
-        } else{
-            Log.e("Connectivity:", "No WiFi nor 4G detected. Using maps from internal" +
-                    "storage");
-        }
 
+        }
         return null;
+    }
+
+    @Override
+    protected void onPostExecute(Void nothing) {
+        SharedPreferences settings = callingActivity.getSharedPreferences("mysettings",
+                Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean("map_exists",true);
+        editor.apply();
     }
 
 
