@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -118,6 +119,7 @@ public class LoadPlacemarksFromFileTask extends AsyncTask<String, Void, List<Pla
             XmlPlacemarkParser parser = new XmlPlacemarkParser();
             placemarks = parser.parse(stream);
         }
+        
         return placemarks;
     }
 

@@ -1,6 +1,7 @@
 package com.finnzhanchen.songgo;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -33,9 +34,20 @@ import java.util.List;
 
 public class DownloadEverythingTask extends AsyncTask<String, Void, Void> {
     Activity callingActivity = new Activity();
+    ProgressDialog dialog = null;
 
     public DownloadEverythingTask(Activity callingActivity){
         this.callingActivity = callingActivity;
+        this.dialog =new ProgressDialog(callingActivity);
+    }
+
+    @Override
+    protected void onPreExecute(){
+        // Download progress dialog
+        dialog.setMessage("Please wait until all maps have been downloaded.");
+        dialog.setCancelable(false);
+        dialog.setInverseBackgroundForced(false);
+        dialog.show();
     }
 
     @Override
@@ -61,6 +73,7 @@ public class DownloadEverythingTask extends AsyncTask<String, Void, Void> {
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean("map_exists",true);
         editor.apply();
+        dialog.hide();
     }
 
 

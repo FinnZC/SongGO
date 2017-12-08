@@ -12,7 +12,7 @@ public class Placemark implements Serializable {
     public final String position; // For example, 48:3
     public final String description;
     public final String styleUrl;
-    public final LatLng point;
+    public LatLng point;
 
     public Placemark(String position, String description, String styleUrl, LatLng point) {
         this.position = position;
