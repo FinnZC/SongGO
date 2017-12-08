@@ -20,44 +20,26 @@ public class ExpandableListViewAdapter extends BaseExpandableListAdapter {
     private String[] groupNames = {
             "Unclassified", "Very Interesting", "Interesting", "Not Boring", "Boring"};
     private ArrayList<ArrayList<String>> childNames =
-            new ArrayList<ArrayList<String>>(5);
+            new ArrayList<ArrayList<String>>(groupNames.length);
     // index at 0 represents unclassified words .... index 4 represents boring words
-    /*
 
-    String[][] childNames = {{}, {}, {}, {}, {}};
-*/
-    Context context;
+    private Context context;
 
-    public ExpandableListViewAdapter(Context context, ArrayList<Placemark> collected_placemarks){
-        Log.e("Stage", "ViewAdapted initialisitation reached");
-        Log.e("X placemarks collected", collected_placemarks.size() +"");
+    public ExpandableListViewAdapter(Context context,
+                                     ArrayList<String> unclassified,
+                                     ArrayList<String> veryinteresting,
+                                     ArrayList<String> interesting,
+                                     ArrayList<String> notboring,
+                                     ArrayList<String> boring){
+
         this.context = context;
 
-        //Initialise childNames arraylist of arraylist
-        for (int i = 0; i<groupNames.length; i++){
-            childNames.add(new ArrayList<String>());
-        }
-        Log.e("Before FOR loop", "Reached");
-        for (Placemark placemark : collected_placemarks){
-            Log.e("Inside FOR loop", "Reached");
-            switch (placemark.description){
-                case "Unclassified":
-                    childNames.get(0).add(placemark.position);
-                    break;
-                case "Very Interesting":
-                    childNames.get(1).add(placemark.position);
-                    break;
-                case "Interesting":
-                    childNames.get(2).add(placemark.position);
-                    break;
-                case "Not Boring":
-                    childNames.get(3).add(placemark.position);
-                    break;
-                case "Boring":
-                    childNames.get(4).add(placemark.position);
-                    break;
-            }
-        }
+        //Initialise childNames arraylist of arraylist to the appropiate list of placemarks
+        childNames.add(unclassified);
+        childNames.add(veryinteresting);
+        childNames.add(interesting);
+        childNames.add(notboring);
+        childNames.add(boring);
     }
 
     @Override

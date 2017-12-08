@@ -29,9 +29,9 @@ public class Activity_1_Start extends AppCompatActivity {
         setContentView(R.layout.activity_1_start_);
 
         // Get previous user name if exist
-        EditText nameBox = (EditText) findViewById(R.id.name_box);
         SharedPreferences settings = getSharedPreferences("mysettings",
                 Context.MODE_PRIVATE);
+        EditText nameBox = (EditText) findViewById(R.id.name_box);
         String name = settings.getString("user_name", "" /*Default value */);
         nameBox.setText(name);
 
@@ -44,10 +44,9 @@ public class Activity_1_Start extends AppCompatActivity {
             // Telling users that no internet connection is detected so the game will use
             // downloaded maps. If no maps are downloaded, then user cannot select any map.
             Context context = getApplicationContext();
-            CharSequence text = "No WiFi nor 4G detected. Using maps from internal storage.If no map" +
+            String text = "No WiFi nor 4G detected. Using maps from internal storage.If no map" +
                     "is downloaded then you cannot select a map to play :(";
-            int duration = Toast.LENGTH_LONG;
-            Toast toast = Toast.makeText(context, text, duration);
+            Toast toast = Toast.makeText(context, text, Toast.LENGTH_LONG);
             toast.show();
         }
     }
@@ -64,7 +63,7 @@ public class Activity_1_Start extends AppCompatActivity {
         editor.apply();
 
 
-        //Check if there are any maps downloaded
+        //Check if there are any maps downloaded and ready for play
         Boolean map_exists = settings.getBoolean("map_exists", false /*Default value */);
 
         if (map_exists){
@@ -73,9 +72,8 @@ public class Activity_1_Start extends AppCompatActivity {
         } else {
             // Telling user that there are no maps to play
             Context context = getApplicationContext();
-            CharSequence text = "There are no maps to play. Please connect to the Internet!";
-            int duration = Toast.LENGTH_LONG;
-            Toast toast = Toast.makeText(context, text, duration);
+            String text = "There are no maps to play. Please connect to the Internet!";
+            Toast toast = Toast.makeText(context, text, Toast.LENGTH_LONG);
             toast.show();
         }
     }
@@ -85,5 +83,4 @@ public class Activity_1_Start extends AppCompatActivity {
         Intent intent = new Intent(this,Activity_8_Achievement.class);
         startActivity(intent);
     }
-
 }

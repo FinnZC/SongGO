@@ -31,32 +31,41 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".Activity_1_Start">
+        <activity android:name=".Activity_1_Start"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Activity_2_Choose_Song" />
+        <activity android:name=".Activity_2_Choose_Song"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".Activity_3_Game"
             android:label="Game Map"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".Activity_4_View_Collected_Song"
-            android:label="View Collected Words" />
+            android:label="View Collected Words"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".Activity_5_Guess_Song"
-            android:label="Guess Song" />
+            android:label="Guess Song"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".Activity_6_Win"
-            android:label="Victory" />
+            android:label="Victory"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".Activity_8_Achievement"
-            android:label="Achievement" />
-        <activity android:name=".Activity_7_Lose"
-            android:label="Game Over" ></activity>
+            android:label="Achievement"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".Activity_7_Lose"
+            android:label="Game Over"
+            android:screenOrientation="portrait"></activity>
     </application>
 
 </manifest>

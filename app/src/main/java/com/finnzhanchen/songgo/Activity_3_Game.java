@@ -22,6 +22,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -54,21 +55,28 @@ public class Activity_3_Game extends AppCompatActivity
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener{
 
-    // Could use Map to implement Treemap if requires order for logn seach algorithm
+    // A map of markers pointing to its corresponding placemark
     private HashMap<Marker, Placemark> markerMap = new HashMap<Marker, Placemark>();
+    // A copy of the original markerMap for the superpower feature
+    private HashMap<Marker, Placemark> markerMapOld = new HashMap<Marker, Placemark>();
     // Lyrics for this song
     private HashMap<String, String[]> lyrics = new HashMap<String, String[]>();
     // Collected Placemarks
-    private ArrayList<Placemark> collected_placemarks = new ArrayList<>();
-    private GoogleMap mMap;
+    private ArrayList<Placemark> collectedPlacemarks = new ArrayList<>();
     // Add coloured captureCircle with radius circle_radius around current location.
     Circle captureCircle;
-    // All markers within the radius are captured
-    int capture_circle_radius;
+    // All markers within the radius are captured in metres
+    int captureCircleRadius;
     // Song selected from previous screen
-    Song song_selected = null;
+    Song songSelected = null;
+    // Default number of guess remaining on a new game
+    int guessRemaining = 5;
+    // Default number of superpowerRemaining on a new game
+    int superpowerRemaining = 3;
+    // Update guess remaining request code
+    static final int UPDATE_GUESS_REMAINING_REQUEST = 1;  // The request code
 
-
+    private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean mLocationPermissionGranted = false;
@@ -105,7 +113,7 @@ public class Activity_3_Game extends AppCompatActivity
                     .build();
         }
 
-        //seeFileLists();
+        //seeInternalStorageFilesList();
     }
 
 
@@ -121,47 +129,73 @@ public class Activity_3_Game extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        try {
-            // Visualise current position with a small blue captureCircle
-            mMap.setMyLocationEnabled(true);
-
-        } catch (SecurityException se) {
-            System.out.println("Security exception thrown [onMapReady]");
-        }
-        // Add "My location" and "Zoom" button to the user interface
-        mMap.getUiSettings().setMyLocationButtonEnabled(true);
-        mMap.getUiSettings().setZoomControlsEnabled(true);
 
         Intent intent = getIntent();
-        song_selected = (Song) intent.getSerializableExtra("song_selected");
+        songSelected = (Song) intent.getSerializableExtra("songSelected");
         String difficulty = intent.getStringExtra("difficulty_selected");
 
+        initialiseGuessRemaining();
+        initialiseSuperpower();
+        setUI();
+        setCaptureRange(difficulty);
+        drawRectangleOnMap();
+        loadPlacemarksOnMap(difficulty);
+        loadSongLyrics();
+    }
+
+    private void initialiseSuperpower(){
+        SharedPreferences settings = getSharedPreferences("mysettings", Context.MODE_PRIVATE);
+        // Adds accumulated superpowerRemaining from past victories
+        // on top of default number of superpowerRemaining on a new game
+        int accumulatedSuperpower = settings.getInt("superpower_remaining", 0 /*Default value on new install*/);
+        superpowerRemaining = superpowerRemaining + accumulatedSuperpower;
+
+        Context context = getApplicationContext();
+        String text = "Accumulated " + accumulatedSuperpower + " superpower from previous gameplay!";
+        Toast toast = Toast.makeText(context, text, Toast.LENGTH_LONG);
+        toast.show();
+    }
+
+    private void initialiseGuessRemaining(){
+        SharedPreferences settings = getSharedPreferences("mysettings", Context.MODE_PRIVATE);
+        // Adds accumulated guess remaining from past victories
+        // on top of default number of guess remaining on a new game
+        int accumulatedGuess = settings.getInt("guess_remaining", 0 /*Default value on new install*/);
+        guessRemaining = guessRemaining + accumulatedGuess;
+        Context context = getApplicationContext();
+        String text = "Accumulated " + accumulatedGuess + " guess from previous gameplay!";
+        Toast toast = Toast.makeText(context, text, Toast.LENGTH_LONG);
+        toast.show();
+    }
+
+    private void setCaptureRange(String difficulty){
         switch (difficulty){
             case "Novice":
-                capture_circle_radius = 50;
+                captureCircleRadius = 50;
                 break;
             case "Easy":
-                capture_circle_radius = 40;
+                captureCircleRadius = 40;
                 break;
             case "Normal":
-                capture_circle_radius = 30;
+                captureCircleRadius = 30;
                 break;
             case "Hard":
-                capture_circle_radius = 20;
+                captureCircleRadius = 20;
                 break;
             case "Extreme":
-                capture_circle_radius = 15;
+                captureCircleRadius = 15;
                 break;
             default:
-                capture_circle_radius = 50;
+                captureCircleRadius = 50;
                 break;
         }
         // Initialise the captureCircle
         captureCircle = mMap.addCircle(new CircleOptions()
                 .center(new LatLng(0, 0))
-                .radius(capture_circle_radius)
+                .radius(captureCircleRadius)
                 .strokeColor(Color.parseColor("#d52133")));
-
+    }
+    private void drawRectangleOnMap(){
         // Instantiates a new Polyline object and adds points to define a rectangle
         // representing the area of the game map
         PolygonOptions rectOptions = new PolygonOptions()
@@ -172,11 +206,6 @@ public class Activity_3_Game extends AppCompatActivity
                         new LatLng(55.946233, -3.192473))
                 .strokeColor(Color.parseColor("#d52133"));
         mMap.addPolygon(rectOptions);
-
-        //Log.e("song", song + difficulty);
-        loadPlacemarksOnMap(difficulty);
-        loadSongLyrics();
-
     }
 
     @Override
@@ -219,13 +248,6 @@ public class Activity_3_Game extends AppCompatActivity
             mLastLocation =
                     LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
-            // Add user name to navigation drawer
-            SharedPreferences settings = getSharedPreferences("mysettings",
-                    Context.MODE_PRIVATE);
-            TextView nameBox = (TextView) findViewById(R.id.user_name_text);
-            String name = settings.getString("user_name", "" /*Default*/);
-            nameBox.setText(name);
-
             // When connected, move camera to last known user location
             if (mLastLocation != null) {
                 LatLng myLastLocation =
@@ -234,24 +256,49 @@ public class Activity_3_Game extends AppCompatActivity
                 mMap.animateCamera(myLocation);
             }
 
-            // Initialise game properties in Navigation Drawer view
-            NavigationView nav_view = (NavigationView) findViewById(R.id.nav_view);
-            Menu menu = nav_view.getMenu();
-
-            // Add selected song to navigation drawer
-            MenuItem songBox = menu.findItem(R.id.item_song);
-            songBox.setTitle("Song: " + song_selected.number);
-
-            // Add difficulty to navigation drawer
-            MenuItem difficultyBox = menu.findItem(R.id.item_difficulty);
-            String difficulty = getIntent().getStringExtra("difficulty_selected");
-            difficultyBox.setTitle("Difficulty: " + difficulty);
-
         } else {
             ActivityCompat.requestPermissions(this,
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
+    }
+
+    private void setUI(){
+        try {
+            // Visualise current position with a small blue captureCircle
+            mMap.setMyLocationEnabled(true);
+
+        } catch (SecurityException se) {
+            System.out.println("Security exception thrown [onMapReady]");
+        }
+
+        // Add "My location" and "Zoom" button to the user interface
+        mMap.getUiSettings().setMyLocationButtonEnabled(true);
+        mMap.getUiSettings().setZoomControlsEnabled(true);
+
+        // Add user name to navigation drawer
+        SharedPreferences settings = getSharedPreferences("mysettings", Context.MODE_PRIVATE);
+        TextView nameBox = (TextView) findViewById(R.id.user_name_text);
+        String name = settings.getString("user_name", "" /*Default*/);
+        nameBox.setText(name);
+
+        // Initialise game properties in Navigation Drawer view
+        NavigationView nav_view = (NavigationView) findViewById(R.id.nav_view);
+        Menu menu = nav_view.getMenu();
+        // Add selected song to navigation drawer
+        MenuItem songBox = menu.findItem(R.id.item_song);
+        songBox.setTitle("Song: " + songSelected.number);
+        // Add difficulty to navigation drawer
+        MenuItem difficultyBox = menu.findItem(R.id.item_difficulty);
+        String difficulty = getIntent().getStringExtra("difficulty_selected");
+        difficultyBox.setTitle("Difficulty: " + difficulty);
+        // Add guess remaining to navigation drawer
+        MenuItem guessRemainingBox = menu.findItem(R.id.item_guess_remaining);
+        guessRemainingBox.setTitle("Guess Remaining: " + guessRemaining);
+        // Add supowerpower remaining to navigation drawer
+        MenuItem superpowerBox = menu.findItem(R.id.item_superpower_remaining);
+        superpowerBox.setTitle("Superpower Remaining: " + superpowerRemaining);
+        Log.e("SUPERPOWER, GUESS: ", superpowerRemaining + " " + guessRemaining);
     }
 
     @Override
@@ -260,20 +307,7 @@ public class Activity_3_Game extends AppCompatActivity
                 + String.valueOf(current.getLatitude())
                 + ","
                 + String.valueOf(current.getLongitude()));
-
-        // Center the captureCircle to the current location
-        captureCircle.setCenter(new LatLng(current.getLatitude(), current.getLongitude()));
-
-        for (Marker marker : markerMap.keySet()){
-            Location marker_location = new Location("");
-            marker_location.setLatitude(marker.getPosition().latitude);
-            marker_location.setLongitude(marker.getPosition().longitude);
-            // If markers within x metres, collect it and remove from map
-            if (current.distanceTo(marker_location) < capture_circle_radius){
-                collected_placemarks.add(markerMap.get(marker));
-                marker.remove();
-            }
-        }
+        collectPlacemarksWithinRange(current);
     }
 
     @Override
@@ -288,24 +322,40 @@ public class Activity_3_Game extends AppCompatActivity
         System.out.println(" >>>> onConnectionFailed");
     }
 
-    // Written by me
+
+    private void collectPlacemarksWithinRange(Location current) {
+        // Center the captureCircle to the current location
+        captureCircle.setCenter(new LatLng(current.getLatitude(), current.getLongitude()));
+
+        for (Marker marker : markerMap.keySet()) {
+            Location marker_location = new Location("");
+            marker_location.setLatitude(marker.getPosition().latitude);
+            marker_location.setLongitude(marker.getPosition().longitude);
+            // If markers within x metres, collect it and remove from map
+            if (current.distanceTo(marker_location) < captureCircleRadius) {
+                collectedPlacemarks.add(markerMap.get(marker));
+                marker.remove();
+            }
+        }
+    }
+
     private void loadPlacemarksOnMap(String difficulty){
         String fileName = null;
         switch (difficulty){
             case "Novice":
-                fileName = "Song" + song_selected.number + "-Map5";
+                fileName = "Song" + songSelected.number + "-Map5";
                 break;
             case "Easy":
-                fileName = "Song" + song_selected.number + "-Map4";
+                fileName = "Song" + songSelected.number + "-Map4";
                 break;
             case "Normal":
-                fileName = "Song" + song_selected.number + "-Map3";
+                fileName = "Song" + songSelected.number + "-Map3";
                 break;
             case "Hard":
-                fileName = "Song" + song_selected.number + "-Map2";
+                fileName = "Song" + songSelected.number + "-Map2";
                 break;
             case "Extreme":
-                fileName = "Song" + song_selected.number + "-Map1";
+                fileName = "Song" + songSelected.number + "-Map1";
                 break;
             default:
                 Log.e("ERROR:", "Difficulty selected not an option");
@@ -313,17 +363,18 @@ public class Activity_3_Game extends AppCompatActivity
         }
         Log.e("FileName:", fileName);
         if (fileName!=null)
-            new LoadPlacemarkTask(this, mMap, markerMap).execute(fileName);
+            new LoadPlacemarksFromFileTask(this, mMap, markerMap).execute(fileName);
     }
 
     private void loadSongLyrics(){
-        String fileName = "Lyrics" + song_selected.number;
-        new LoadLyricsTask(this, lyrics).execute(fileName);
+        String fileName = "Lyrics" + songSelected.number;
+        new LoadLyricsFromFileTask(this, lyrics).execute(fileName);
     }
 
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        // Close drawer is it's open, and if it's closed, ask if user wants to quit game
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -344,19 +395,18 @@ public class Activity_3_Game extends AppCompatActivity
             Intent intent = new Intent(this, Activity_4_View_Collected_Song.class);
 
             // LinkedHashSet is used to preserve the order in which words are collected
-            // so can be outputted in a order way to user
+            // and avoids repetition
             LinkedHashSet<String> unclassified_words = new LinkedHashSet<String>();
             LinkedHashSet<String> veryinteresting_words = new LinkedHashSet<String>();
             LinkedHashSet<String> interesting_words = new LinkedHashSet<String>();
             LinkedHashSet<String> notboring_words = new LinkedHashSet<String>();
             LinkedHashSet<String> boring_words = new LinkedHashSet<String>();
-            String[] position;
+            String[] position; // splits "4:23" into line_number and word_index
             String line_number;
             int word_index;
             String word;
 
-
-            for (Placemark placemark : collected_placemarks){
+            for (Placemark placemark : collectedPlacemarks){
                 position = placemark.position.split(":");
                 line_number = position[0];
                 word_index = Integer.parseInt(position[1]) - 1;
@@ -389,6 +439,7 @@ public class Activity_3_Game extends AppCompatActivity
                 }
             }
 
+            // Type of collected words are initialised as an ArrayList passed to the intents
             intent.putStringArrayListExtra(
                     "unclassified_words",new ArrayList<String>(unclassified_words));
             intent.putStringArrayListExtra(
@@ -404,10 +455,34 @@ public class Activity_3_Game extends AppCompatActivity
 
         } else if (id == R.id.item_guess_song) {
             Intent intent = new Intent(this, Activity_5_Guess_Song.class);
-            intent.putExtra("song_selected", song_selected);
-            startActivity(intent);
+            String difficulty = getIntent().getStringExtra("difficulty_selected");
+            intent.putExtra("difficulty", difficulty);
+            intent.putExtra("songSelected", songSelected);
+            intent.putExtra("guessRemaining", guessRemaining);
+            intent.putExtra("superpowerRemaining", superpowerRemaining);
+
+            startActivityForResult(intent, UPDATE_GUESS_REMAINING_REQUEST);
 
         } else if (id == R.id.item_superpower) {
+            if (superpowerRemaining > 0) {
+                decrementSuperpower();
+                markerMapOld = new HashMap<Marker, Placemark>(markerMap);
+                mMap.clear(); // Remove all markers on map
+                loadPlacemarksOnMap("Easy");
+
+                // Superpower finishes,
+                // Remove all markers on map and revert map back with old placemarks
+                new ReloadPlacemarksToMapTask(mMap, markerMapOld).execute();
+                markerMap = new HashMap<Marker, Placemark>(markerMapOld);
+
+
+            } else{
+                // Telling user that there are no remaining superpower
+                Context context = getApplicationContext();
+                String text = "You have no more superpower!";
+                Toast toast = Toast.makeText(context, text, Toast.LENGTH_LONG);
+                toast.show();
+            }
 
         } else if (id == R.id.item_give_up) {
             AlertDialog giveUp = AskOption();
@@ -419,13 +494,8 @@ public class Activity_3_Game extends AppCompatActivity
         return true;
     }
 
-    private void viewCollectedWords(){
-
-    }
-
     // Code reuse from https://stackoverflow.com/questions/24359667/how-to-disable-back-button-for-particular-activity
-    private AlertDialog AskOption()
-    {
+    private AlertDialog AskOption(){
         AlertDialog myQuittingDialogBox =new AlertDialog.Builder(this)
                 .setTitle("Exit")
                 .setMessage("Are you sure you want to give up?")
@@ -442,13 +512,41 @@ public class Activity_3_Game extends AppCompatActivity
                 })
                 .create();
         return myQuittingDialogBox;
-
     }
 
-    // For testing only
-    private void seeFileLists() {
+    // For testing only, prints out all files in the internal storage
+    private void seeInternalStorageFilesList() {
         for (String name :this.fileList()){
             Log.e("File", name);
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Check which request we're responding to
+        if (requestCode == UPDATE_GUESS_REMAINING_REQUEST) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                updateGuessRemaining(data.getIntExtra("guessRemaining", 0));
+            }
+        }
+    }
+
+    private void decrementSuperpower(){
+        superpowerRemaining = superpowerRemaining - 1;
+        NavigationView nav_view = (NavigationView) findViewById(R.id.nav_view);
+        Menu menu = nav_view.getMenu();
+        MenuItem superpowerBox = menu.findItem(R.id.item_superpower_remaining);
+        superpowerBox.setTitle("Superpower Remaining: " + superpowerRemaining);
+
+    }
+
+    private void updateGuessRemaining(int newGuessRemaining){
+        guessRemaining = newGuessRemaining;
+        // Update guess remaining in navigation drawer
+        NavigationView nav_view = (NavigationView) findViewById(R.id.nav_view);
+        Menu menu = nav_view.getMenu();
+        MenuItem guessRemainingBox = menu.findItem(R.id.item_guess_remaining);
+        guessRemainingBox.setTitle("Guess Remaining: " + guessRemaining);
     }
 }

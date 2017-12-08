@@ -17,7 +17,7 @@ public class Activity_2_Choose_Song extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_2_choose_song);
-        new LoadSongTask(this, songMap).execute();
+        new LoadSongFromFileTask(this, songMap).execute();
     }
 
     /** Called when the user taps the GO button */
@@ -30,7 +30,7 @@ public class Activity_2_Choose_Song extends AppCompatActivity {
 
 
         Song song_selected = songMap.get(song_number_selected);
-        intent.putExtra("song_selected", song_selected);
+        intent.putExtra("songSelected", song_selected);
         intent.putExtra("difficulty_selected", difficulty_selected);
         startActivity(intent);
     }
@@ -45,7 +45,7 @@ public class Activity_2_Choose_Song extends AppCompatActivity {
         int x = rand.nextInt(song_selector.getCount());
         Song song_selected = songMap.get(song_selector.getItemAtPosition(x).toString());
         //Log.e("Random Song: ", x + "");
-        //Log.e("Random Song Selected: ", song_selected);
+        //Log.e("Random Song Selected: ", songSelected);
 
         // Get random number between 0 to 4 which represent from Novice to Hardcore
         x = rand.nextInt(5);
@@ -55,7 +55,7 @@ public class Activity_2_Choose_Song extends AppCompatActivity {
         Log.e("Random Difficulty: ", x + "");
         Log.e("Difficulty Selected: ", difficulty_selected);
 
-        intent.putExtra("song_selected", song_selected);
+        intent.putExtra("songSelected", song_selected);
         intent.putExtra("difficulty_selected", difficulty_selected);
 
         startActivity(intent);

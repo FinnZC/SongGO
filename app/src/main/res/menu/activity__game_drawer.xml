@@ -14,7 +14,7 @@
         android:id="@+id/item_guess_remaining"
         android:title="Guess Remaining: 5" />
     <item
-        android:id="@+id/item_superpower_remainin"
+        android:id="@+id/item_superpower_remaining"
         android:title="Superpower Remaining: 3" />
     <item android:title="Available Actions">
         <menu>
