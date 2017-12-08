@@ -37,7 +37,8 @@ public class LoadLyricsFromFileTask extends AsyncTask<String, Void, Void> {
     @Override
     protected Void doInBackground(String... fileName) {
         // Parse kml file from internal storage
-        String lyricPath = callingActivity.getFilesDir() + "/" + fileName;
+        String lyricPath = callingActivity.getFilesDir() + "/" + fileName[0];
+        Log.e("Lyric path:", lyricPath);
         File file = new File(lyricPath);
 
         try {
@@ -47,15 +48,16 @@ public class LoadLyricsFromFileTask extends AsyncTask<String, Void, Void> {
             while ((line = reader.readLine()) != null){
                 addLineLyrics(line);
             }
-            /*
-            // print out lyrics hashmap for debugging
-            for (String item : lyrics.keySet()) {
-                Log.e("Lyrics", item + " " + Arrays.toString(lyrics.get(item)));
-            }
-            */
         } catch (IOException e) {
             e.printStackTrace();
         }
+        /*
+        // print out lyrics hashmap for debugging
+        for (String item : lyrics.keySet()) {
+            Log.e("Lyrics", item + " " + Arrays.toString(lyrics.get(item)));
+        }
+        */
+        Log.e("Loading Lyrics", "Completed");
         return null;
     }
 
@@ -67,7 +69,7 @@ public class LoadLyricsFromFileTask extends AsyncTask<String, Void, Void> {
         // Returns string of format ["     01", "My song lyrics"]
         String[] lineSplit = line.split("\\t");
 
-        //Log.e("Line splitted: ", Arrays.toString(lineSplit));
+        Log.e("Line splitted: ", Arrays.toString(lineSplit));
 
         // Remove unnecessary preceding spaces for line number
         String line_number = lineSplit[0].replaceAll("\\s", "");

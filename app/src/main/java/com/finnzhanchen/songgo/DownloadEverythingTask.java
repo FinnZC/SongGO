@@ -105,20 +105,29 @@ public class DownloadEverythingTask extends AsyncTask<String, Void, Void> {
 
 
     private void downloadAllSongsToInternalStorage(List<Song> songsList){
-        saveFile("http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/songs.xml"
-                , "SongsXML");
+        String url;
+        String outputFileName;
         for (Song song : songsList){
             for (int i = 1; i <= 5 ; i++){
-                String url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/"
+                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/"
                         + song.number + "/map" + i + ".kml";
                 // Output file names are of format "Song1-Map1"
-                String outputFileName = "Song" + song.number + "-Map" + i;
-                Log.e("Stage downloadAllSongs", "Song: " + song.number +"Map: " + i);
+                outputFileName = "Song" + song.number + "-Map" + i;
                 saveFile(url, outputFileName);
+
+
+                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/"
+                        + song.number + "/words.txt";
+                outputFileName = "Lyrics" + song.number;
+                saveFile(url, outputFileName);
+                Log.e("Stage downloadAllSongs", "Song: " + song.number +"Map: " + i);
+                Log.e("Stage downloadAllSongs", "Lyrics: " + song.number);
             }
-            saveFile("http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/"
-                    + song.number + "/words.txt", "Lyrics" + song.number);
         }
+        // Save SongsXMl last because this way ensures all songs are downloaded correctly
+        // during isSameVersion check
+        saveFile("http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/songs.xml"
+                , "SongsXML");
     }
 
     private void saveFile(String url, String outputFileName){

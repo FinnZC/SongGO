@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
-
+import java.util.concurrent.ConcurrentHashMap;
 
 
 // WRITTEN BY ME: FINN ZHAN CHEN
@@ -26,10 +26,12 @@ import java.util.List;
 public class LoadPlacemarksFromFileTask extends AsyncTask<String, Void, List<Placemark>> {
 
     GoogleMap map;
-    HashMap<Marker, Placemark> markerMap;
+    ConcurrentHashMap<Marker, Placemark> markerMap;
     Activity callingActivity = new Activity();
 
-    public LoadPlacemarksFromFileTask(Activity callingActivity, GoogleMap map, HashMap<Marker, Placemark> markerMap){
+    public LoadPlacemarksFromFileTask(Activity callingActivity,
+                                      GoogleMap map,
+                                      ConcurrentHashMap<Marker, Placemark> markerMap){
         this.callingActivity = callingActivity;
         this.map = map;
         this.markerMap = markerMap;

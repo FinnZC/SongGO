@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -42,8 +43,10 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.PolygonOptions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 // WRITTEN BY ME: FINN ZHAN CHEN
 // ALL THIRD PARTY CODES ARE DOCUMENTED
@@ -55,16 +58,17 @@ public class Activity_3_Game extends AppCompatActivity
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener{
 
-    // A map of markers pointing to its corresponding placemark
-    private HashMap<Marker, Placemark> markerMap = new HashMap<Marker, Placemark>();
+    // A map of markers pointing to its corresponding placemark,
+    // It allows concurrent modification from several threads without the need to block them.
+    private ConcurrentHashMap<Marker, Placemark> markerMap = new ConcurrentHashMap<Marker, Placemark>();
     // A copy of the original markerMap for the superpower feature
-    private HashMap<Marker, Placemark> markerMapOld = new HashMap<Marker, Placemark>();
+    private ConcurrentHashMap<Marker, Placemark> markerMapOld;
     // Lyrics for this song
     private HashMap<String, String[]> lyrics = new HashMap<String, String[]>();
     // Collected Placemarks
     private ArrayList<Placemark> collectedPlacemarks = new ArrayList<>();
     // Add coloured captureCircle with radius circle_radius around current location.
-    Circle captureCircle;
+    private Circle captureCircle;
     // All markers within the radius are captured in metres
     int captureCircleRadius;
     // Song selected from previous screen
@@ -73,6 +77,8 @@ public class Activity_3_Game extends AppCompatActivity
     int guessRemaining = 5;
     // Default number of superpowerRemaining on a new game
     int superpowerRemaining = 3;
+    // Is superpower active? This prevents superpower activated when it is already active
+    boolean isSuperpowerActive = false;
     // Update guess remaining request code
     static final int UPDATE_GUESS_REMAINING_REQUEST = 1;  // The request code
 
@@ -112,8 +118,9 @@ public class Activity_3_Game extends AppCompatActivity
                     .addApi(LocationServices.API)
                     .build();
         }
+        seeInternalStorageFilesList();
 
-        //seeInternalStorageFilesList();
+
     }
 
 
@@ -129,18 +136,20 @@ public class Activity_3_Game extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
         Intent intent = getIntent();
         songSelected = (Song) intent.getSerializableExtra("songSelected");
         String difficulty = intent.getStringExtra("difficulty_selected");
-
         initialiseGuessRemaining();
         initialiseSuperpower();
         setUI();
         setCaptureRange(difficulty);
         drawRectangleOnMap();
-        loadPlacemarksOnMap(difficulty);
         loadSongLyrics();
+        // print out lyrics hashmap for debugging
+        for (String line : lyrics.keySet()) {
+            Log.e("Lyrics", line + " " + Arrays.toString(lyrics.get(line)));
+        }
+        loadPlacemarksOnMap(difficulty);
     }
 
     private void initialiseSuperpower(){
@@ -148,12 +157,9 @@ public class Activity_3_Game extends AppCompatActivity
         // Adds accumulated superpowerRemaining from past victories
         // on top of default number of superpowerRemaining on a new game
         int accumulatedSuperpower = settings.getInt("superpower_remaining", 0 /*Default value on new install*/);
+        makeToast("Accumulated " + accumulatedSuperpower + " superpower from previous gameplay!");
         superpowerRemaining = superpowerRemaining + accumulatedSuperpower;
 
-        Context context = getApplicationContext();
-        String text = "Accumulated " + accumulatedSuperpower + " superpower from previous gameplay!";
-        Toast toast = Toast.makeText(context, text, Toast.LENGTH_LONG);
-        toast.show();
     }
 
     private void initialiseGuessRemaining(){
@@ -161,11 +167,8 @@ public class Activity_3_Game extends AppCompatActivity
         // Adds accumulated guess remaining from past victories
         // on top of default number of guess remaining on a new game
         int accumulatedGuess = settings.getInt("guess_remaining", 0 /*Default value on new install*/);
+        makeToast("Accumulated " + accumulatedGuess + " superpower from previous gameplay!");
         guessRemaining = guessRemaining + accumulatedGuess;
-        Context context = getApplicationContext();
-        String text = "Accumulated " + accumulatedGuess + " guess from previous gameplay!";
-        Toast toast = Toast.makeText(context, text, Toast.LENGTH_LONG);
-        toast.show();
     }
 
     private void setCaptureRange(String difficulty){
@@ -307,7 +310,7 @@ public class Activity_3_Game extends AppCompatActivity
                 + String.valueOf(current.getLatitude())
                 + ","
                 + String.valueOf(current.getLongitude()));
-        collectPlacemarksWithinRange(current);
+        capturePlacemarksWithinRange(current);
     }
 
     @Override
@@ -323,18 +326,26 @@ public class Activity_3_Game extends AppCompatActivity
     }
 
 
-    private void collectPlacemarksWithinRange(Location current) {
+    private void capturePlacemarksWithinRange(Location current) {
         // Center the captureCircle to the current location
         captureCircle.setCenter(new LatLng(current.getLatitude(), current.getLongitude()));
-
+        // Play sound once only in each location change
+        boolean soundPlayed = false;
+        // ConcurrentHashMap avoids ConcurrentModificationException
         for (Marker marker : markerMap.keySet()) {
             Location marker_location = new Location("");
             marker_location.setLatitude(marker.getPosition().latitude);
             marker_location.setLongitude(marker.getPosition().longitude);
             // If markers within x metres, collect it and remove from map
             if (current.distanceTo(marker_location) < captureCircleRadius) {
+                if (!soundPlayed) {
+                    new PlaySoundWhenCollectedTask(this).execute();
+                    soundPlayed = true;
+                }
                 collectedPlacemarks.add(markerMap.get(marker));
                 marker.remove();
+                markerMap.remove(marker);
+
             }
         }
     }
@@ -368,6 +379,7 @@ public class Activity_3_Game extends AppCompatActivity
 
     private void loadSongLyrics(){
         String fileName = "Lyrics" + songSelected.number;
+        Log.e("Loading:", fileName);
         new LoadLyricsFromFileTask(this, lyrics).execute(fileName);
     }
 
@@ -406,36 +418,33 @@ public class Activity_3_Game extends AppCompatActivity
             int word_index;
             String word;
 
-            for (Placemark placemark : collectedPlacemarks){
-                position = placemark.position.split(":");
-                line_number = position[0];
-                word_index = Integer.parseInt(position[1]) - 1;
-                // -1 because format provided starts with 1
-                word = lyrics.get(line_number)[word_index];
-                /*
-                // print out lyrics hashmap for debugging
-                for (String line : lyrics.keySet()) {
-                    Log.e("Lyrics", line + " " + Arrays.toString(lyrics.get(line)));
-                }
-                */
-                switch (placemark.description){
-                    case "unclassified":
-                        unclassified_words.add(word);
-                        break;
-                    case "veryinteresting":
-                        veryinteresting_words.add(word);
-                        break;
-                    case "interesting":
-                        interesting_words.add(word);
-                        break;
-                    case "notboring":
-                        notboring_words.add(word);
-                        break;
-                    case "boring":
-                        boring_words.add(word);
-                        break;
-                    default:
-                        break;
+            if (collectedPlacemarks.size() > 0) {
+                for (Placemark placemark : collectedPlacemarks) {
+                    position = placemark.position.split(":");
+                    line_number = position[0];
+                    word_index = Integer.parseInt(position[1]) - 1;
+                    // -1 because format provided starts with 1
+                    word = lyrics.get(line_number)[word_index];
+                    switch (placemark.description) {
+                        case "unclassified":
+                            unclassified_words.add(word);
+                            break;
+                        case "veryinteresting":
+                            veryinteresting_words.add(word);
+                            break;
+                        case "interesting":
+                            interesting_words.add(word);
+                            break;
+                        case "notboring":
+                            notboring_words.add(word);
+                            break;
+                        case "boring":
+                            boring_words.add(word);
+                            break;
+                        default:
+                            // Hn
+                            break;
+                    }
                 }
             }
 
@@ -464,24 +473,50 @@ public class Activity_3_Game extends AppCompatActivity
             startActivityForResult(intent, UPDATE_GUESS_REMAINING_REQUEST);
 
         } else if (id == R.id.item_superpower) {
-            if (superpowerRemaining > 0) {
-                decrementSuperpower();
-                markerMapOld = new HashMap<Marker, Placemark>(markerMap);
-                mMap.clear(); // Remove all markers on map
-                loadPlacemarksOnMap("Easy");
+            if (!isSuperpowerActive) {
+                superpowerRemaining = superpowerRemaining - 1;
+                isSuperpowerActive = true;
+                // Telling user that the superpower is active
+                makeToast("Superpower is active for 60 seconds!");
+                if (superpowerRemaining > 0) {
+                    String difficulty = getIntent().getStringExtra("difficulty_selected");
+                    String newDifficulty = null;
+                    switch (difficulty) {
+                        case "Novice":
+                            // Easiest mode already so no effect
+                            break;
+                        case "Easy":
+                            newDifficulty = "Novice";
+                            break;
+                        case "Normal":
+                            newDifficulty = "Easy";
+                            break;
+                        case "Hard":
+                            newDifficulty = "Normal";
+                            break;
+                        case "Extreme":
+                            newDifficulty = "Hard";
+                            break;
+                        default:
+                            break;
+                    }
 
-                // Superpower finishes,
-                // Remove all markers on map and revert map back with old placemarks
-                new ReloadPlacemarksToMapTask(mMap, markerMapOld).execute();
-                markerMap = new HashMap<Marker, Placemark>(markerMapOld);
+                    if (newDifficulty != null) {
+                        markerMapOld = new ConcurrentHashMap<Marker, Placemark>(markerMap);
+                        mMap.clear(); // Remove all markers on map and capture circle
+                        // Initialise new capture range
+                        setCaptureRange(newDifficulty);
+                        loadPlacemarksOnMap(newDifficulty);
+                        activateCountDownTimer(60000, difficulty);
+                    }
 
-
-            } else{
-                // Telling user that there are no remaining superpower
-                Context context = getApplicationContext();
-                String text = "You have no more superpower!";
-                Toast toast = Toast.makeText(context, text, Toast.LENGTH_LONG);
-                toast.show();
+                } else {
+                    // Telling user that there are no remaining superpower
+                    makeToast("You have no more superpower!");
+                }
+            } else {
+                // Telling user that the superpower is already active
+                makeToast("Superpower is already active!");
             }
 
         } else if (id == R.id.item_give_up) {
@@ -492,6 +527,43 @@ public class Activity_3_Game extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void makeToast(String text){
+        Context context = getApplicationContext();
+        Toast toast = Toast.makeText(context, text, Toast.LENGTH_LONG);
+        toast.show();
+    }
+
+    private void activateCountDownTimer(int timeInMilisecond, final String difficulty){
+        new CountDownTimer(timeInMilisecond, 1000) {
+            public void onTick(long millisUntilFinished) {
+                NavigationView nav_view = (NavigationView) findViewById(R.id.nav_view);
+                Menu menu = nav_view.getMenu();
+                MenuItem superpowerBox = menu.findItem(R.id.item_superpower_remaining);
+                superpowerBox.setTitle("Superpower Time Remaining: " + millisUntilFinished / 1000 + "s");
+                //here you can have your logic to set text to edittext
+            }
+
+            public void onFinish() {
+                // Superpower finishes,
+                isSuperpowerActive = false;
+                // Inform user
+                makeToast("Superpower deactivated!");
+                // Replace timer with number of superpower remaining
+                NavigationView nav_view = (NavigationView) findViewById(R.id.nav_view);
+                Menu menu = nav_view.getMenu();
+                MenuItem superpowerBox = menu.findItem(R.id.item_superpower_remaining);
+                superpowerBox.setTitle("Superpower Remaining: " + superpowerRemaining);
+                // Remove all markers and capture circle
+                mMap.clear();
+                // Revert to old capture range
+                setCaptureRange(difficulty);
+                // Remove all markers on map and revert map back with old placemarks
+                markerMap = new ConcurrentHashMap<Marker, Placemark>(markerMapOld);
+                new ReloadPlacemarksToMapTask(mMap, markerMap).execute();
+            }
+        }.start();
     }
 
     // Code reuse from https://stackoverflow.com/questions/24359667/how-to-disable-back-button-for-particular-activity
@@ -532,14 +604,6 @@ public class Activity_3_Game extends AppCompatActivity
         }
     }
 
-    private void decrementSuperpower(){
-        superpowerRemaining = superpowerRemaining - 1;
-        NavigationView nav_view = (NavigationView) findViewById(R.id.nav_view);
-        Menu menu = nav_view.getMenu();
-        MenuItem superpowerBox = menu.findItem(R.id.item_superpower_remaining);
-        superpowerBox.setTitle("Superpower Remaining: " + superpowerRemaining);
-
-    }
 
     private void updateGuessRemaining(int newGuessRemaining){
         guessRemaining = newGuessRemaining;
