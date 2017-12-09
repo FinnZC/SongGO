@@ -1,6 +1,10 @@
 package com.finnzhanchen.songgo;
 
 import android.app.Activity;
+import android.content.Context;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -29,13 +33,16 @@ public class LoadPlacemarksFromFileTask extends AsyncTask<String, Void, List<Pla
     GoogleMap map;
     ConcurrentHashMap<Marker, Placemark> markerMap;
     Activity callingActivity = new Activity();
+    LatLng gameStartPosition;
 
     public LoadPlacemarksFromFileTask(Activity callingActivity,
                                       GoogleMap map,
-                                      ConcurrentHashMap<Marker, Placemark> markerMap){
+                                      ConcurrentHashMap<Marker, Placemark> markerMap,
+                                      LatLng gameStartPosition){
         this.callingActivity = callingActivity;
         this.map = map;
         this.markerMap = markerMap;
+        this.gameStartPosition = gameStartPosition;
     }
 
 
@@ -119,7 +126,19 @@ public class LoadPlacemarksFromFileTask extends AsyncTask<String, Void, List<Pla
             XmlPlacemarkParser parser = new XmlPlacemarkParser();
             placemarks = parser.parse(stream);
         }
-        
+
+        // midPoint is the center of the maps built around Edinburgh
+        // Is used to calculate the relative distance between the placemarks
+        // and the current location of the user
+        LatLng midPoint = new LatLng((55.946233 + 55.942617)/2.0,-(3.192473 + 3.184319)/2.0);
+        Log.e("gameStartPositionTask", gameStartPosition.latitude + " "+ gameStartPosition.longitude);
+        for (Placemark placemark : placemarks){
+            double newLat = placemark.point.latitude - midPoint.latitude
+                            +  gameStartPosition.latitude;
+            double newLng = placemark.point.longitude - midPoint.longitude
+                            +  gameStartPosition.longitude;
+            placemark.point = new LatLng(newLat, newLng);
+        }
         return placemarks;
     }
 

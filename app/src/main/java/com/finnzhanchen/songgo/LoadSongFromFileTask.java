@@ -77,6 +77,7 @@ public class LoadSongFromFileTask extends AsyncTask<Void, Void, List<Song>> {
         // attaching data adapter to spinner
         spinner_song.setAdapter(dataAdapter_song);
 
+
         // Spinner element for difficulty
         Spinner spinner_difficulty = (Spinner) callingActivity.findViewById(R.id.spinner_difficulty);
         // Spinner Drop down elements
@@ -87,5 +88,19 @@ public class LoadSongFromFileTask extends AsyncTask<Void, Void, List<Song>> {
         dataAdapter_difficulty.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // attaching data adapter to spinner
         spinner_difficulty.setAdapter(dataAdapter_difficulty);
+
+        // Spinner element for difficulty
+        Spinner spinner_where = (Spinner) callingActivity.findViewById(R.id.spinner_where);
+        // Spinner Drop down elements
+        String[] where = new String[] {"My Current Location",
+                                        "University of Edinburgh",
+                                        "Wall Street New York",
+                                        "Imperial College London"};
+        // Creating adapter for spinner
+        ArrayAdapter<String> dataAdapter_where = new ArrayAdapter<String>(
+                callingActivity, android.R.layout.simple_spinner_item, where);
+        dataAdapter_where.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // attaching data adapter to spinner
+        spinner_where.setAdapter(dataAdapter_where);
     }
 }

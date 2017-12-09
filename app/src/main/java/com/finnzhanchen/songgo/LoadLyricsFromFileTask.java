@@ -69,7 +69,7 @@ public class LoadLyricsFromFileTask extends AsyncTask<String, Void, Void> {
         // Returns string of format ["     01", "My song lyrics"]
         String[] lineSplit = line.split("\\t");
 
-        Log.e("Line splitted: ", Arrays.toString(lineSplit));
+        //Log.e("Line splitted: ", Arrays.toString(lineSplit));
 
         // Remove unnecessary preceding spaces for line number
         String line_number = lineSplit[0].replaceAll("\\s", "");

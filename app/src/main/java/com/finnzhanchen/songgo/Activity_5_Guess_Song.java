@@ -95,6 +95,8 @@ public class Activity_5_Guess_Song extends AppCompatActivity {
         // Get date
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
         String date = dateFormat.format(new Date()); //2017/11/16 12:08
+        // Get where the map was played
+        String where = getIntent().getStringExtra("where");
         // Get user name
         String user_name = settings.getString("user_name", "No Name");
         // Get difficulty
@@ -103,6 +105,7 @@ public class Activity_5_Guess_Song extends AppCompatActivity {
         String songDetails = songSelected.title + " by " + songSelected.artist;
         // Combine info and add formatted string to completedSongsSet for further processing later
         String item = date + "\n"
+                + where + "\n"
                 + user_name + " - " + difficulty + "\n"
                 + songDetails + "\n"
                 + "CLICK TO LISTEN ON YOUTUBE"

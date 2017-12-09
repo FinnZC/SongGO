@@ -25,6 +25,8 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.location.FusedLocationProviderApi;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -41,6 +43,7 @@ import com.google.android.gms.location.LocationServices;
 
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.PolygonOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,15 +73,17 @@ public class Activity_3_Game extends AppCompatActivity
     // Add coloured captureCircle with radius circle_radius around current location.
     private Circle captureCircle;
     // All markers within the radius are captured in metres
-    int captureCircleRadius;
+    private int captureCircleRadius;
     // Song selected from previous screen
-    Song songSelected = null;
+    private Song songSelected;
     // Default number of guess remaining on a new game
-    int guessRemaining = 5;
+    private int guessRemaining = 5;
     // Default number of superpowerRemaining on a new game
-    int superpowerRemaining = 3;
+    private int superpowerRemaining = 3;
     // Is superpower active? This prevents superpower activated when it is already active
-    boolean isSuperpowerActive = false;
+    private boolean isSuperpowerActive = false;
+    // Used to adjust placemarks for bonus feature of playing a map anywhere centered to user
+    private LatLng gameStartPosition;
     // Update guess remaining request code
     static final int UPDATE_GUESS_REMAINING_REQUEST = 1;  // The request code
 
@@ -118,7 +123,7 @@ public class Activity_3_Game extends AppCompatActivity
                     .addApi(LocationServices.API)
                     .build();
         }
-        seeInternalStorageFilesList();
+        //seeInternalStorageFilesList();
 
 
     }
@@ -136,20 +141,6 @@ public class Activity_3_Game extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        Intent intent = getIntent();
-        songSelected = (Song) intent.getSerializableExtra("songSelected");
-        String difficulty = intent.getStringExtra("difficulty_selected");
-        initialiseGuessRemaining();
-        initialiseSuperpower();
-        setUI();
-        setCaptureRange(difficulty);
-        drawRectangleOnMap();
-        loadSongLyrics();
-        // print out lyrics hashmap for debugging
-        for (String line : lyrics.keySet()) {
-            Log.e("Lyrics", line + " " + Arrays.toString(lyrics.get(line)));
-        }
-        loadPlacemarksOnMap(difficulty);
     }
 
     private void initialiseSuperpower(){
@@ -251,12 +242,50 @@ public class Activity_3_Game extends AppCompatActivity
             mLastLocation =
                     LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
-            // When connected, move camera to last known user location
+
             if (mLastLocation != null) {
-                LatLng myLastLocation =
-                        new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-                CameraUpdate myLocation = CameraUpdateFactory.newLatLngZoom(myLastLocation, 18);
+                // Gets the game starting location
+                switch (getIntent().getStringExtra("where_selected")){
+                    case "My Current Location":
+                        gameStartPosition =
+                                new LatLng(mLastLocation.getLatitude(),
+                                        mLastLocation.getLongitude());
+                        break;
+                    case "University of Edinburgh":
+                        // Center of the maps built around central campus
+                        // Assuming all placemarks are within the latitude and longitude
+                        // specified in the coursework
+                        gameStartPosition =
+                                new LatLng((55.946233 + 55.942617)/2.0,
+                                        -(3.192473 + 3.184319)/2.0);
+                        break;
+
+                    case "Wall Street New York":
+                        gameStartPosition = new LatLng(40.706380, -74.009504);
+                        break;
+                    case "Imperial College London":
+                        gameStartPosition = new LatLng(51.498728, -0.174987);
+                        break;
+                    default:
+                        // None of the available options
+                        // Will probably never enter this option
+                        gameStartPosition = new LatLng(0,0);
+                        break;
+                }
+                // When connected, move camera to game start position
+                CameraUpdate myLocation = CameraUpdateFactory.newLatLngZoom(gameStartPosition, 18);
                 mMap.animateCamera(myLocation);
+
+                Intent intent = getIntent();
+                songSelected = (Song) intent.getSerializableExtra("songSelected");
+                String difficulty = intent.getStringExtra("difficulty_selected");
+                initialiseGuessRemaining();
+                initialiseSuperpower();
+                setUI();
+                setCaptureRange(difficulty);
+                //drawRectangleOnMap();
+                loadSongLyrics();
+                loadPlacemarksOnMap(difficulty);
             }
 
         } else {
@@ -373,14 +402,17 @@ public class Activity_3_Game extends AppCompatActivity
                 break;
         }
         Log.e("FileName:", fileName);
-        if (fileName!=null)
-            new LoadPlacemarksFromFileTask(this, mMap, markerMap).execute(fileName);
+        if (fileName!=null) {
+            //getStartGamePosition(fileName);
+            new LoadPlacemarksFromFileTask(this, mMap, markerMap, gameStartPosition).execute(fileName);
+        }
     }
 
     private void loadSongLyrics(){
         String fileName = "Lyrics" + songSelected.number;
         Log.e("Loading:", fileName);
         new LoadLyricsFromFileTask(this, lyrics).execute(fileName);
+
     }
 
     @Override
@@ -442,7 +474,7 @@ public class Activity_3_Game extends AppCompatActivity
                             boring_words.add(word);
                             break;
                         default:
-                            // Hn
+                            // Word not in any category is skipped
                             break;
                     }
                 }
@@ -469,6 +501,7 @@ public class Activity_3_Game extends AppCompatActivity
             intent.putExtra("songSelected", songSelected);
             intent.putExtra("guessRemaining", guessRemaining);
             intent.putExtra("superpowerRemaining", superpowerRemaining);
+            intent.putExtra("where", getIntent().getStringExtra("where_selected"));
 
             startActivityForResult(intent, UPDATE_GUESS_REMAINING_REQUEST);
 
