@@ -1,9 +1,13 @@
 package com.finnzhanchen.songgo;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,7 +26,7 @@ import java.net.URL;
 import java.util.List;
 
 public class Activity_1_Start extends AppCompatActivity {
-
+    private final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +40,18 @@ public class Activity_1_Start extends AppCompatActivity {
         String name = settings.getString("user_name", "" /*Default value */);
         nameBox.setText(name);
 
+        // Get Location permission first
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED) {
+            // Nothing
+        } else {
+            ActivityCompat.requestPermissions(this,
+                new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }
+
+
         if (Connectivity.isConnectedWifi(this) || Connectivity.isConnectedMobile(this)){
             String song_url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/songs.xml";
             new DownloadEverythingTask(this).execute(song_url);
@@ -45,8 +61,7 @@ public class Activity_1_Start extends AppCompatActivity {
             // Telling users that no internet connection is detected so the game will use
             // downloaded maps. If no maps are downloaded, then user cannot select any map.
             Context context = getApplicationContext();
-            String text = "No WiFi nor 4G detected. Using maps from internal storage.If no map" +
-                    "is downloaded then you cannot select a map to play :(";
+            String text = "No WiFi nor 4G detected. Using downloaded maps.";
             Toast toast = Toast.makeText(context, text, Toast.LENGTH_LONG);
             toast.show();
         }

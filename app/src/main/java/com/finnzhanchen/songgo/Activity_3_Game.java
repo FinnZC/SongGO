@@ -43,10 +43,8 @@ import com.google.android.gms.location.LocationServices;
 
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.PolygonOptions;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -84,6 +82,8 @@ public class Activity_3_Game extends AppCompatActivity
     private boolean isSuperpowerActive = false;
     // Used to adjust placemarks for bonus feature of playing a map anywhere centered to user
     private LatLng gameStartPosition;
+    // Mute or unmute the game sound
+    private boolean isMute = true;
     // Update guess remaining request code
     static final int UPDATE_GUESS_REMAINING_REQUEST = 1;  // The request code
 
@@ -367,7 +367,7 @@ public class Activity_3_Game extends AppCompatActivity
             marker_location.setLongitude(marker.getPosition().longitude);
             // If markers within x metres, collect it and remove from map
             if (current.distanceTo(marker_location) < captureCircleRadius) {
-                if (!soundPlayed) {
+                if (!soundPlayed && !isMute) {
                     new PlaySoundWhenCollectedTask(this).execute();
                     soundPlayed = true;
                 }
@@ -517,6 +517,7 @@ public class Activity_3_Game extends AppCompatActivity
                     switch (difficulty) {
                         case "Novice":
                             // Easiest mode already so no effect
+                            newDifficulty = "Novice";
                             break;
                         case "Easy":
                             newDifficulty = "Novice";
@@ -552,13 +553,23 @@ public class Activity_3_Game extends AppCompatActivity
                 makeToast("Superpower is already active!");
             }
 
+        } else if (id == R.id.item_mute){
+            NavigationView nav_view = (NavigationView) findViewById(R.id.nav_view);
+            Menu menu = nav_view.getMenu();
+            MenuItem muteItem = menu.findItem(R.id.item_mute);
+            if (isMute){
+                isMute = false;
+                muteItem.setTitle("Sound On");
+            } else {
+                isMute = true;
+                muteItem.setTitle("Sound Off");
+            }
+
         } else if (id == R.id.item_give_up) {
             AlertDialog giveUp = AskOption();
             giveUp.show();
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 

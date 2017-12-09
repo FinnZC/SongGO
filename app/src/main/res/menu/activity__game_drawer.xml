@@ -31,6 +31,10 @@
                 android:icon="@android:drawable/ic_menu_search"
                 android:title="Superpower" />
             <item
+                android:id="@+id/item_mute"
+                android:icon="@drawable/mr_vol_type_audiotrack_light"
+                android:title="Sound Off" />
+            <item
                 android:id="@+id/item_give_up"
                 android:icon="?android:attr/alertDialogIcon"
                 android:title="Give Up" />
