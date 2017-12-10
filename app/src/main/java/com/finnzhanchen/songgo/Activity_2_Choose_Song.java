@@ -63,5 +63,6 @@ public class Activity_2_Choose_Song extends AppCompatActivity {
         intent.putExtra("difficultySelected", difficultySelected);
         startActivity(intent);
     }
+
 }
 

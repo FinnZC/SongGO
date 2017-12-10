@@ -39,9 +39,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.PolygonOptions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -82,6 +80,8 @@ public class Activity_3_Game extends AppCompatActivity
     private LatLng gameStartPosition;
     // Mute or unmute the game sound
     private boolean isMute = true;
+    // Is game initialised
+    private boolean isGameInitialised = false;
     // Update guess remaining request code
     static final int UPDATE_GUESS_REMAINING_REQUEST = 1;  // The request code
     // settings is initialised in OnCreate
@@ -124,12 +124,14 @@ public class Activity_3_Game extends AppCompatActivity
         }
         //seeInternalStorageFilesList();
         settings = getSharedPreferences("mysettings", Context.MODE_PRIVATE);
+
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
     }
+
 
     @Override
     protected void onStart(){
@@ -164,67 +166,14 @@ public class Activity_3_Game extends AppCompatActivity
         catch (java.lang.IllegalStateException ise) {
             System.out.println("IllegalStateException thrown [onConnected]");
         }
-        // Can we access the user’s current location?
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) ==
-                PackageManager.PERMISSION_GRANTED) {
-            mLastLocation =
-                    LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
-            if (mLastLocation != null) {
-                // Gets the game starting location
-                switch (getIntent().getStringExtra("whereSelected")){
-                    case "My Current Location":
-                        gameStartPosition =
-                                new LatLng(mLastLocation.getLatitude(),
-                                        mLastLocation.getLongitude());
-                        break;
-                    case "George Square, Edinburgh":
-                        // Center of the maps built around central campus
-                        // Assuming all placemarks are within the latitude and longitude
-                        // specified in the coursework
-                        gameStartPosition =
-                                new LatLng((55.946233 + 55.942617)/2.0,
-                                        -(3.192473 + 3.184319)/2.0);
-                        break;
-                    case  "Wall Street, New York":
-                        gameStartPosition = new LatLng(40.706380, -74.009504);
-                        break;
-                    case "Imperial College, London":
-                        gameStartPosition = new LatLng(51.498728, -0.174987);
-                        break;
-                    case "Las Palmas, Gran Canaria":
-                        gameStartPosition = new LatLng(28.099870, -15.454743);
-                        break;
-                    case "Hollywood, Los Angeles":
-                        gameStartPosition = new LatLng(34.089920, -118.321221);
-                        break;
-                    default:
-                        // None of the available options
-                        // Will probably never enter this option
-                        gameStartPosition = new LatLng(0,0);
-                        break;
-                }
-                // When connected, move camera to game start position
-                CameraUpdate myLocation = CameraUpdateFactory.newLatLngZoom(gameStartPosition, 18);
-                mMap.animateCamera(myLocation);
-
-                Intent intent = getIntent();
-                songSelected = (Song) intent.getSerializableExtra("songSelected");
-                String difficulty = intent.getStringExtra("difficultySelected");
-                initialiseGuessRemaining();
-                initialiseSuperpower();
-                setUI();
-                setCaptureRange(difficulty);
-                //drawRectangleOnMap();
-                loadSongLyrics();
-                loadPlacemarksOnMap(difficulty);
-            }
-
-        } else {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        // Only able to get user's location on onConnected so will initialise the game here
+        // Set up the game which require the user's current position1 in setGameStartPosition
+        if (!isGameInitialised){
+            initialiseGame();
+            isGameInitialised = true;
+        } else{
+            moveCameraToLastKnownPosition();
         }
     }
 
@@ -299,6 +248,23 @@ public class Activity_3_Game extends AppCompatActivity
 
     // Non Override methods
 
+    private void initialiseGame(){
+        Intent intent = getIntent();
+        songSelected = (Song) intent.getSerializableExtra("songSelected");
+        String difficulty = intent.getStringExtra("difficultySelected");
+        initialiseGuessRemaining();
+        initialiseSuperpower();
+        setUI();
+        setCaptureRange(difficulty);
+        loadSongLyrics();
+        setGameStartPosition();
+        loadPlacemarksOnMap(difficulty);
+        // Move camera to gameStartPosition
+        CameraUpdate myLocation = CameraUpdateFactory.newLatLngZoom(gameStartPosition, 18);
+        mMap.animateCamera(myLocation);
+
+    }
+
     private void initialiseSuperpower(){
         // Adds accumulated superpowerRemaining from past victories
         // on top of default number of superpowerRemaining on a new game
@@ -351,6 +317,62 @@ public class Activity_3_Game extends AppCompatActivity
         MenuItem superpowerBox = menu.findItem(R.id.item_superpower_remaining);
         superpowerBox.setTitle("Superpower Remaining: " + superpowerRemaining);
         Log.e("SUPERPOWER, GUESS: ", superpowerRemaining + " " + guessRemaining);
+    }
+
+    private boolean setGameStartPosition(){
+        // Initialise Game Placemarks
+        // Can we access the user’s current location?
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED) {
+            mLastLocation =
+                    LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+
+            if (mLastLocation != null) {
+                // Gets the game starting location
+                switch (getIntent().getStringExtra("whereSelected")){
+                    case "My Current Location":
+                        gameStartPosition =
+                                new LatLng(mLastLocation.getLatitude(),
+                                        mLastLocation.getLongitude());
+                        break;
+                    case "George Square, Edinburgh":
+                        // Center of the maps built around central campus
+                        // Assuming all placemarks are within the latitude and longitude
+                        // specified in the coursework
+                        gameStartPosition =
+                                new LatLng((55.946233 + 55.942617)/2.0,
+                                        -(3.192473 + 3.184319)/2.0);
+                        break;
+                    case  "Wall Street, New York":
+                        gameStartPosition = new LatLng(40.706380, -74.009504);
+                        break;
+                    case "Imperial College, London":
+                        gameStartPosition = new LatLng(51.498728, -0.174987);
+                        break;
+                    case "Las Palmas, Gran Canaria":
+                        gameStartPosition = new LatLng(28.099870, -15.454743);
+                        break;
+                    case "Hollywood, Los Angeles":
+                        gameStartPosition = new LatLng(34.089920, -118.321221);
+                        break;
+                    default:
+                        // None of the available options
+                        // Will probably never enter this option
+                        gameStartPosition = new LatLng(0,0);
+                        break;
+                }
+                return true;
+            }
+            Log.e("mLastLocation", "is null!");
+            return false;
+
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+            return false;
+        }
     }
 
     private void setCaptureRange(String difficulty){
@@ -561,25 +583,6 @@ public class Activity_3_Game extends AppCompatActivity
         }
     }
 
-    private void toggleMute(){
-        NavigationView nav_view = (NavigationView) findViewById(R.id.nav_view);
-        Menu menu = nav_view.getMenu();
-        MenuItem muteItem = menu.findItem(R.id.item_mute);
-        if (isMute){
-            isMute = false;
-            muteItem.setTitle("Sound On");
-        } else {
-            isMute = true;
-            muteItem.setTitle("Sound Off");
-        }
-    }
-
-    private void makeToast(String text){
-        Context context = getApplicationContext();
-        Toast toast = Toast.makeText(context, text, Toast.LENGTH_LONG);
-        toast.show();
-    }
-
     private void activateCountDownTimer(int timeInMilisecond, final String difficulty){
         new CountDownTimer(timeInMilisecond, 1000) {
             public void onTick(long millisUntilFinished) {
@@ -611,6 +614,25 @@ public class Activity_3_Game extends AppCompatActivity
         }.start();
     }
 
+    private void toggleMute(){
+        NavigationView nav_view = (NavigationView) findViewById(R.id.nav_view);
+        Menu menu = nav_view.getMenu();
+        MenuItem muteItem = menu.findItem(R.id.item_mute);
+        if (isMute){
+            isMute = false;
+            muteItem.setTitle("Sound On");
+        } else {
+            isMute = true;
+            muteItem.setTitle("Sound Off");
+        }
+    }
+
+    private void makeToast(String text){
+        Context context = getApplicationContext();
+        Toast toast = Toast.makeText(context, text, Toast.LENGTH_LONG);
+        toast.show();
+    }
+    
     private void updateGuessRemaining(int newGuessRemaining){
         guessRemaining = newGuessRemaining;
         // Update guess remaining in navigation drawer
@@ -618,6 +640,29 @@ public class Activity_3_Game extends AppCompatActivity
         Menu menu = nav_view.getMenu();
         MenuItem guessRemainingBox = menu.findItem(R.id.item_guess_remaining);
         guessRemainingBox.setTitle("Guess Remaining: " + guessRemaining);
+    }
+
+    private void moveCameraToLastKnownPosition(){
+        // Can we access the user’s current location?
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED) {
+            mLastLocation =
+                    LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            // When connected, move camera to last known user location
+            if (mLastLocation != null) {
+                LatLng myLastLocation =
+                        new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                CameraUpdate myLocation = CameraUpdateFactory.newLatLngZoom(myLastLocation, 18);
+                mMap.animateCamera(myLocation);
+            }
+
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }
+
     }
 
     // Code reuse from https://stackoverflow.com/questions/24359667/how-to-disable-back-button-for-particular-activity
