@@ -37,7 +37,6 @@ public class Activity_6_Win extends AppCompatActivity {
                 + superpowerRemaining + " superpower accumulated for next game!";
         remainingTextView.setText(text);
 
-
         // Saves the remaining guesses and superpower for next game
         SharedPreferences.Editor editor = settings.edit();
         editor.putInt("guess_remaining", guessRemaining);

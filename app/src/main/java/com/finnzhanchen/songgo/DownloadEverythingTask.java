@@ -6,16 +6,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
-import android.widget.Toast;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -24,13 +19,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-
-//SOFWARE ENGINEERLING LARGE PRACTICAL LECTURE 4
-//WHERE MY OWN CODE STARTS IS DOCUMENTED
-
+// WRITTEN BY ME: FINN ZHAN CHEN
 
 public class DownloadEverythingTask extends AsyncTask<String, Void, Void> {
     Activity callingActivity = new Activity();
@@ -60,7 +51,6 @@ public class DownloadEverythingTask extends AsyncTask<String, Void, Void> {
             } catch (IOException|XmlPullParserException e) {
                 e.printStackTrace();
             }
-
         }
         return null;
     }
@@ -69,27 +59,27 @@ public class DownloadEverythingTask extends AsyncTask<String, Void, Void> {
     protected void onPostExecute(Void nothing) {
         SharedPreferences settings = callingActivity.getSharedPreferences("mysettings",
                 Context.MODE_PRIVATE);
-
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean("map_exists",true);
         editor.apply();
         dialog.hide();
     }
 
-
     private boolean isSameVersion(){
+        // Check if song.xml exists in the internal storage
         String xmlPath = callingActivity.getFilesDir() + "/SongsXML";
         File xmlFile = new File(xmlPath);
-        // Check if song.xml exists in the internal storage
         if (xmlFile.exists() && !xmlFile.isDirectory()){
             try {
+                // Checks version of the internal songs.xml and the live songs.xml
                 BufferedReader localSongXML = new BufferedReader(new FileReader(xmlFile));
+
                 URL songURL = new URL("http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/songs.xml");
                 BufferedReader onlineSongXML = new BufferedReader(new InputStreamReader(songURL.openStream()));
                 // Ignore the first line which is "<?xml version="1.0" encoding="UTF-8"?>"
                 localSongXML.readLine();
                 onlineSongXML.readLine();
-                // The second time includes the timestamp
+                // The second line includes the timestamp
                 if (localSongXML.readLine().equals(onlineSongXML.readLine())){
                     Log.e("Is same version?", "YES!");
                     // Same timestamp so return true.
@@ -115,26 +105,23 @@ public class DownloadEverythingTask extends AsyncTask<String, Void, Void> {
     }
 
 
-
-
     private void downloadAllSongsToInternalStorage(List<Song> songsList){
         String url;
         String outputFileName;
         for (Song song : songsList){
+            url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/"
+                    + song.number + "/words.txt";
+            outputFileName = "Lyrics" + song.number;
+            saveFile(url, outputFileName);
+            Log.e("Stage downloadAllSongs", "Lyrics: " + song.number);
+
             for (int i = 1; i <= 5 ; i++){
                 url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/"
                         + song.number + "/map" + i + ".kml";
                 // Output file names are of format "Song1-Map1"
                 outputFileName = "Song" + song.number + "-Map" + i;
                 saveFile(url, outputFileName);
-
-
-                url = "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/"
-                        + song.number + "/words.txt";
-                outputFileName = "Lyrics" + song.number;
-                saveFile(url, outputFileName);
                 Log.e("Stage downloadAllSongs", "Song: " + song.number +"Map: " + i);
-                Log.e("Stage downloadAllSongs", "Lyrics: " + song.number);
             }
         }
         // Save SongsXMl last because this way ensures all songs are downloaded correctly

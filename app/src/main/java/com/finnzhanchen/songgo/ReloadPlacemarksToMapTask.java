@@ -5,11 +5,9 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 // WRITTEN BY ME: FINN ZHAN CHEN
-// ALL THIRD PARTY CODES ARE DOCUMENTED
 
 public class ReloadPlacemarksToMapTask extends AsyncTask<Void, Void, Void> {
 

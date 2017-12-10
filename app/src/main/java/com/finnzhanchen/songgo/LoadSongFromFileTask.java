@@ -16,10 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-
-//SOFWARE ENGINEERLING LARGE PRACTICAL LECTURE 4
-//WHERE MY OWN CODE STARTS IS DOCUMENTED
-
+// WRITTEN BY ME: FINN ZHAN CHEN
 
 public class LoadSongFromFileTask extends AsyncTask<Void, Void, List<Song>> {
     Activity callingActivity = new Activity();
@@ -89,13 +86,16 @@ public class LoadSongFromFileTask extends AsyncTask<Void, Void, List<Song>> {
         // attaching data adapter to spinner
         spinner_difficulty.setAdapter(dataAdapter_difficulty);
 
-        // Spinner element for difficulty
+        // Spinner element for where to play
         Spinner spinner_where = (Spinner) callingActivity.findViewById(R.id.spinner_where);
         // Spinner Drop down elements
         String[] where = new String[] {"My Current Location",
-                                        "University of Edinburgh",
-                                        "Wall Street New York",
-                                        "Imperial College London"};
+                                        "George Square, Edinburgh",
+                                        "Wall Street, New York",
+                                        "Imperial College, London",
+                                        "Las Palmas, Gran Canaria",
+                                        "Hollywood, Los Angeles"
+                                        };
         // Creating adapter for spinner
         ArrayAdapter<String> dataAdapter_where = new ArrayAdapter<String>(
                 callingActivity, android.R.layout.simple_spinner_item, where);

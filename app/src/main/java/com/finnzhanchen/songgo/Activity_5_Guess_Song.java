@@ -20,11 +20,13 @@ public class Activity_5_Guess_Song extends AppCompatActivity {
     private int guessRemaining;
     private int superpowerRemaining;
     private Song songSelected;
+    private SharedPreferences settings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_5_guess_song);
+        settings = getSharedPreferences("mysettings", Context.MODE_PRIVATE);
         guessRemaining = getIntent().getIntExtra("guessRemaining", 0);
         superpowerRemaining = getIntent().getIntExtra("superpowerRemaining", 0);
         songSelected = (Song) getIntent().getSerializableExtra("songSelected");
@@ -55,7 +57,7 @@ public class Activity_5_Guess_Song extends AppCompatActivity {
             if (guessRemaining > 0) {
                 Context context = getApplicationContext();
                 String text = "WRONG! " + guessRemaining + " GUESSES REMAINING!";
-                Toast toast = Toast.makeText(context, text, Toast.LENGTH_LONG);
+                Toast toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
                 toast.show();
                 updateText();
             } else {
@@ -63,7 +65,6 @@ public class Activity_5_Guess_Song extends AppCompatActivity {
                 // Clear Activity Stack so user cannot go back to the game when lost
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 // Saves the remaining guesses and powerpower for next game
-                SharedPreferences settings = getSharedPreferences("mysettings", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putInt("guess_remaining", 0);
                 editor.putInt("superpower_remaining", 0);
@@ -88,8 +89,6 @@ public class Activity_5_Guess_Song extends AppCompatActivity {
     }
 
     private void addSongToAchievement(){
-        SharedPreferences settings = getSharedPreferences("mysettings",
-                Context.MODE_PRIVATE);
         // Use HashSet to store the completed songs
         Set<String> completedSongsSet = settings.getStringSet("completed_songs", new HashSet<String>());
         // Get date
@@ -116,7 +115,5 @@ public class Activity_5_Guess_Song extends AppCompatActivity {
         SharedPreferences.Editor editor = settings.edit();
         editor.putStringSet("completed_songs", completedSongsSet);
         editor.apply();
-
     }
-
 }

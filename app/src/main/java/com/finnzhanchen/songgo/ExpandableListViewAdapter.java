@@ -1,8 +1,6 @@
 package com.finnzhanchen.songgo;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,11 +8,9 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
-/**
- * Created by chen on 05/11/2017.
- */
+
+// WRITTEN BY ME: FINN ZHAN CHEN
 
 public class ExpandableListViewAdapter extends BaseExpandableListAdapter {
     private String[] groupNames = {

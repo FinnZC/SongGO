@@ -13,10 +13,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by chen on 02/11/2017.
- */
-
 // WRITTEN BY ME: FINN ZHAN CHEN
 // ALL THIRD PARTY CODES ARE DOCUMENTED
 public class XmlPlacemarkParser {
@@ -35,7 +31,6 @@ public class XmlPlacemarkParser {
         }
     }
 
-
     private List<Placemark> readKml(XmlPullParser parser) throws
             XmlPullParserException, IOException {
         //Log.e("Kml", "Reached");
@@ -46,7 +41,7 @@ public class XmlPlacemarkParser {
                 continue;
             }
             String name = parser.getName();
-            // Starts by looking for the entry tag
+            // Starts by looking for the Document tag
             if (name.equals("Document")) {
                 placemarks = readDocument(parser);
             } else {
@@ -67,7 +62,7 @@ public class XmlPlacemarkParser {
             }
             String name = parser.getName();
             //Log.e("Parse Tag in readDoc", name);
-            // Starts by looking for the entry tag
+            // Starts by looking for the Placemark tag
             if (name.equals("Placemark")) {
                 Placemark placemark = readPlacemark(parser);
                 //Log.e("Placemark", placemark.position + " " + placemark.styleUrl + " "

@@ -15,8 +15,6 @@ import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class Activity_8_Achievement extends AppCompatActivity {
@@ -53,6 +51,7 @@ public class Activity_8_Achievement extends AppCompatActivity {
             listView.setAdapter(listAdapter);
 
             // Redirect to Youtube when clicked on a song
+            // Source: https://stackoverflow.com/questions/574195/android-youtube-app-play-video-intent
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -62,11 +61,5 @@ public class Activity_8_Achievement extends AppCompatActivity {
                 }
             });
         }
-    }
-
-    public void onButtonWatch(View view) {
-        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://youtu.be/fJ9rUzIMcZQ")));
-        Log.i("Video", "Video Playing....");
-
     }
  }

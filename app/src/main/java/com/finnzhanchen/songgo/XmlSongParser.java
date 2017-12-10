@@ -2,8 +2,6 @@ package com.finnzhanchen.songgo;
 
 import android.util.Xml;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -12,12 +10,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by chen on 02/11/2017.
- */
-
 // WRITTEN BY ME: FINN ZHAN CHEN
-// ALL THIRD PARTY CODES ARE DOCUMENTED
+
 public class XmlSongParser {
     private static final String ns = null;
 
@@ -42,7 +36,7 @@ public class XmlSongParser {
                 continue;
             }
             String name = parser.getName();
-            // Starts by looking for the entry tag
+            // Starts by looking for the Song tag
             if (name.equals("Song")) {
                 Song song = readSong(parser);
                 songs.add(song);
