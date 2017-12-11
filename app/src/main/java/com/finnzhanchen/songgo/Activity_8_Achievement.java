@@ -51,7 +51,6 @@ public class Activity_8_Achievement extends AppCompatActivity {
             listView.setAdapter(listAdapter);
 
             // Redirect to Youtube when clicked on a song
-            // Source: https://stackoverflow.com/questions/574195/android-youtube-app-play-video-intent
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

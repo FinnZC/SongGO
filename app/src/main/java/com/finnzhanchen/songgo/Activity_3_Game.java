@@ -306,6 +306,9 @@ public class Activity_3_Game extends AppCompatActivity
         // Add selected song to navigation drawer
         MenuItem songBox = menu.findItem(R.id.item_song);
         songBox.setTitle("Song: " + songSelected.number);
+        // Add where the game is played
+        MenuItem whereBox = menu.findItem(R.id.item_where);
+        whereBox.setTitle("Where: " + getIntent().getStringExtra("whereSelected"));
         // Add difficulty to navigation drawer
         MenuItem difficultyBox = menu.findItem(R.id.item_difficulty);
         String difficulty = getIntent().getStringExtra("difficultySelected");
@@ -632,7 +635,7 @@ public class Activity_3_Game extends AppCompatActivity
         Toast toast = Toast.makeText(context, text, Toast.LENGTH_LONG);
         toast.show();
     }
-    
+
     private void updateGuessRemaining(int newGuessRemaining){
         guessRemaining = newGuessRemaining;
         // Update guess remaining in navigation drawer

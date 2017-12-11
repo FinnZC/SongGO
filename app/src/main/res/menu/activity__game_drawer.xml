@@ -8,6 +8,9 @@
         android:id="@+id/item_song"
         android:title="Song: " />
     <item
+        android:id="@+id/item_where"
+        android:title="Where: " />
+    <item
         android:id="@+id/item_difficulty"
         android:title="Difficulty: " />
     <item

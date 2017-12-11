@@ -43,7 +43,8 @@ public class DownloadEverythingTask extends AsyncTask<String, Void, Void> {
 
     @Override
     protected Void doInBackground(String... urls) {
-        if (!isSameVersion()){
+        if (!isSameVersion(callingActivity.getFilesDir() + "/SongsXML",
+                "http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/songs.xml")){
             try {
                 // Get a list of all available songs and download them to internal storage.
                 List<Song> songs = loadXmlSongsFromNetwork(urls[0]);
@@ -65,16 +66,15 @@ public class DownloadEverythingTask extends AsyncTask<String, Void, Void> {
         dialog.hide();
     }
 
-    private boolean isSameVersion(){
+    private boolean isSameVersion(String xmlPath, String liveXmlPath){
         // Check if song.xml exists in the internal storage
-        String xmlPath = callingActivity.getFilesDir() + "/SongsXML";
         File xmlFile = new File(xmlPath);
         if (xmlFile.exists() && !xmlFile.isDirectory()){
             try {
                 // Checks version of the internal songs.xml and the live songs.xml
                 BufferedReader localSongXML = new BufferedReader(new FileReader(xmlFile));
 
-                URL songURL = new URL("http://www.inf.ed.ac.uk/teaching/courses/selp/data/songs/songs.xml");
+                URL songURL = new URL(liveXmlPath);
                 BufferedReader onlineSongXML = new BufferedReader(new InputStreamReader(songURL.openStream()));
                 // Ignore the first line which is "<?xml version="1.0" encoding="UTF-8"?>"
                 localSongXML.readLine();

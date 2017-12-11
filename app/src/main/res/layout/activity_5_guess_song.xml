@@ -10,7 +10,7 @@
         android:id="@+id/guess_song_messagetextView3"
         android:layout_width="289dp"
         android:layout_height="79dp"
-        android:text="Finn, can you guess the song?"
+        android:text="Can you guess the song?"
         android:textAlignment="center"
         android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="parent"
