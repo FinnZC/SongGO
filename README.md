@@ -7,7 +7,7 @@ which have been found.
 
 ## Content
 This repository contains the following:
-* The source code for the Android game
+* Source code for the Android game
 * Design Documentation
 * Technical Documentation
 
