@@ -31,14 +31,17 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
+import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 
 import java.util.ArrayList;
@@ -262,6 +265,15 @@ public class Activity_3_Game extends AppCompatActivity
         // Move camera to gameStartPosition
         CameraUpdate myLocation = CameraUpdateFactory.newLatLngZoom(gameStartPosition, 18);
         mMap.animateCamera(myLocation);
+
+        // Add floor map to the Google Map Not For SongGo
+        LatLngBounds atLvl5Bounds = new LatLngBounds(
+                new LatLng(55.94426201125635, -3.1871650367975235),       // South west corner
+                new LatLng(55.944596588047396, -3.186331540346145));      // North east corner
+        GroundOverlayOptions atLvl5Map = new GroundOverlayOptions()
+                .image(BitmapDescriptorFactory.fromResource(R.drawable.at_floor5_v4))
+                .positionFromBounds(atLvl5Bounds);
+        mMap.addGroundOverlay(atLvl5Map);
 
     }
 
